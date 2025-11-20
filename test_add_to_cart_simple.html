@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Add to Cart</title>
+</head>
+<body>
+    <h1>Test Add to Cart Button</h1>
+    <p>Open browser console (F12) to see debug messages</p>
+    
+    <!-- Test button with same data attributes -->
+    <a href="#" class="ajax-add" data-id="1" data-name="Test Keyboard" data-price="99.99" data-image="test.jpg">
+        <button>Add to Cart</button>
+    </a>
+    
+    <script>
+    console.log('=== TEST PAGE LOADED ===');
+    console.log('Current page URL:', window.location.href);
+    console.log('Looking for a.ajax-add elements...');
+    
+    var elements = document.querySelectorAll('a.ajax-add');
+    console.log('Found ' + elements.length + ' ajax-add elements');
+    
+    document.addEventListener('click', function(e) {
+        try {
+            console.log('Click event fired');
+            var target = e.target.closest && e.target.closest('a.ajax-add');
+            console.log('Target element:', target);
+            
+            if (!target) {
+                console.log('Not an ajax-add element, skipping');
+                return;
+            }
+            
+            e.preventDefault();
+            console.log('preventDefault called');
+            
+            var id = target.getAttribute('data-id');
+            var name = target.getAttribute('data-name');
+            var price = target.getAttribute('data-price');
+            var image = target.getAttribute('data-image');
+            
+            console.log('Extracted data:');
+            console.log('  id:', id);
+            console.log('  name:', name);
+            console.log('  price:', price);
+            console.log('  image:', image);
+            
+            // Create FormData and test fetch
+            var form = new FormData();
+            form.append('product_id', id);
+            form.append('product_name', name);
+            form.append('product_price', price);
+            form.append('product_image', image);
+            form.append('quantity', 1);
+            
+            console.log('FormData created, keys:', Array.from(form.entries()));
+            
+            var fetchUrl = '/ITP122/add_to_cart.php';
+            console.log('Fetching from:', fetchUrl);
+            
+            fetch(fetchUrl, {
+                method: 'POST',
+                body: form
+            })
+            .then(function(res) {
+                console.log('Fetch response received');
+                console.log('  status:', res.status);
+                console.log('  ok:', res.ok);
+                console.log('  statusText:', res.statusText);
+                
+                if (!res.ok) {
+                    throw new Error('HTTP error, status = ' + res.status);
+                }
+                
+                // Try to parse JSON
+                console.log('Attempting to parse JSON...');
+                return res.json();
+            })
+            .then(function(data) {
+                console.log('JSON parsed successfully:');
+                console.log('  success:', data.success);
+                console.log('  message:', data.message);
+                console.log('  full response:', data);
+                
+                if (data && data.success) {
+                    alert('SUCCESS: ' + data.message);
+                } else {
+                    alert('FAILED: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(function(err) {
+                console.error('Fetch error caught:');
+                console.error('  Error type:', err.constructor.name);
+                console.error('  Error message:', err.message);
+                console.error('  Full error:', err);
+                alert('ERROR: ' + err.message);
+            });
+            
+        } catch(e) {
+            console.error('Exception caught in click handler:');
+            console.error('  Error type:', e.constructor.name);
+            console.error('  Error message:', e.message);
+            console.error('  Stack:', e.stack);
+            alert('EXCEPTION: ' + e.message);
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Display TEST</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-button {
+            background: #0062F6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #0050cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stock Display Test</h1>
+    <p>Click the button below to test if the modal shows stock information:</p>
+    
+    <a href="#" class="ajax-add" 
+       data-id="23" 
+       data-name="MSI A520m-A Pro AMD Am4 Ddr4 Micro-ATX PCB Gaming Motherboard"
+       data-price="3899.00"
+       data-image="image/MSI_A520m.png">
+        <button class="test-button">Test: Add to Cart</button>
+    </a>
+
+    <hr>
+    <p><strong>What you should see:</strong></p>
+    <ul>
+        <li>Modal popup appears</li>
+        <li><strong>Yellow box showing "Stock: 15"</strong> ← The main thing!</li>
+        <li>Input field with quantity</li>
+        <li>Cancel and Add to Cart buttons</li>
+    </ul>
+
+    <script>
+        console.log('Test page loaded');
+        console.log('When you click the button, check if the stock displays in a yellow box');
+    </script>
+    <script src="ajax-cart.js"></script>
+</body>
+</html>

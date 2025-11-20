@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="shortcut icon" href="image/smartsolutionslogo.jpg" type="image/x-icon">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="design.css" />
+<link rel="stylesheet" href="animations.css" />
+<meta charset="UTF-8">
+	<title>CHECKOUT SMART SOLUTIONS</title>
+</head>
+<body class="checkout-page">
+    <header>
+      <div class="logoheader">
+        <div class="logocp">
+            <img src="image/logocp.png" alt="Smart Solutions Logo">
+        </div>
+    </div>
+    </header>
+
+<div class="checkout-container">
+    <div class="checkout-left">
+        <h2>Account</h2>
+        <p>mrlobhl14@gmail.com</p>
+        <hr>
+        <form class="delivery-form">
+            <label for="country">Delivery</label>
+            <input type="text" id="country" name="country" placeholder="Country/Region" required>
+
+            <div class="name-field">
+                <input type="text" placeholder="First name" required>
+                <input type="text" placeholder="Last name" required>
+            </div>
+
+            <input type="text" placeholder="Address" required>
+            <input type="text" placeholder="Apartment, suite, etc. (optional)">
+
+            <div class="postal-city">
+                <input type="text" placeholder="Postal code" required>
+                <input type="text" placeholder="City" required>
+            </div>
+
+            <label for="region">Region</label>
+            <input type="text" id="region" name="region" placeholder="Region" required>
+
+            <input type="text" placeholder="Phone" required>
+
+            <div class="shipping-container">
+              <div class="shipping-title">Shipping method</div>
+              <div class="shipping-box">
+                Enter your shipping address to view available shipping methods.
+                </div>
+            </div>
+             <button class="cmp-btn" onclick="window.location.href='index.php'">Complete Order</button>
+
+        </form>
+    </div>
+
+    <div class="checkout-right">
+        <div class="item-summary">
+            <img src="image/deal2.png" alt="Product Image">
+            <div>
+                <p>Team Elite Plus 8GB 1x8 3200Mhz Black Gold DDR4 Memory</p>
+            
+            </div>
+        </div>
+        <div class="Discount">
+        <input type="text" placeholder="Discount code or gift card">
+        <button class="apply-btn">Apply</button>
+
+        <div class="total-summary">
+            <p>Subtotal <span>₱1,045.00</span></p>
+            <p>Shipping <span class="shipping">Enter shipping address</span></p>
+            <p class="total">Total <span>₱1,045.00</span></p>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

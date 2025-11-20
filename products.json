@@ -1,0 +1,236 @@
+[
+    {
+    	"id": 1,
+    	"name" :"Core i7 12700 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":25195.00,
+    	"image": "image/desktop1.png"
+    },
+    {
+    	"id": 2,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 3,
+    	"name" :"MSI Thin A15 B7UCX-084PH 15.6/ FHD 144Hz AMD RYZEN 5 7535HS/ 8GB/ 512GBSSD/RTX 2050 4GB/ WIN11 Laptop",
+    	"price":38995.00,
+    	"image": "image/laptop1.png"
+    },
+    {
+    	"id": 4,
+    	"name" :"Lenovo V15 G4 IRU 15.6/ FHD Intel Core i5- 1335U/ 8GB DDR4/ 512GB M.2 SSD Laptop MN",
+    	"price":29495.00,
+    	"image": "image/laptop2.png"
+    },
+    {
+    	"id": 5,
+    	"name" :"Team Elite Vulcan TUF 16gb 2x8 3200mhz Ddr4 Gaming Memory",
+    	"price":1999.00,
+    	"image": "image/deal1.png"
+    },
+    {
+    	"id": 6,
+    	"name" :"Team Elite Plus 8gb 1x8 3200Mhz Black Gold Ddr4 Memory",
+    	"price":1045.00,
+    	"image": "image/deal2.png"
+    },
+    {
+    	"id": 7,
+    	"name" :"G.Skill Ripjaws V 16gb 2x8 3200mhz Ddr4 Memory Black",
+    	"price":2185.00,
+    	"image": "image/deal3.png"
+    },
+    {
+    	"id": 8,
+    	"name" :"Team Elite 8gb 1x8 1600mhz Ddr3 with Heatspreader Memory",
+    	"price":1065.00,
+    	"image": "image/deal4.png"
+    },
+    {
+    	"id": 9,
+    	"name" :"AMD Ryzen 5 Pro 4650G Socket Am4 3.7ghz with Radeon Vega 7 Processor with Wraith Stealth Cooler MPK",
+    	"price":5845.00,
+    	"image": "image/deal5.png"
+    },
+    {
+    	"id": 10,
+    	"name" :"Team Elite TForce Delta TUF 16GB 2x8 3200mhz Ddr4 RGB Gaming Memory",
+    	"price":3155.00,
+    	"image": "image/deal6.png"
+    },
+    {
+    	"id": 11,
+    	"name" :"AMD Ryzen 5 5600G Socket Am4 3.9GHz with Radeon Vega 7 Processor Wraith Stealth Cooler",
+    	"price":6895.00,
+    	"image": "image/ryzen5600g.png"
+    },
+    {
+    	"id": 12,
+    	"name" :"AMD Ryzen 5 5600X Socket AM4 3.7GHz with Wraith Stealth Cooler VR Ready Premium Desktop Processor",
+    	"price":6395.00,
+    	"image": "image/ryzen5600x.png"
+    },
+    {
+    	"id": 13,
+    	"name" :"AMD Ryzen 7 5700X Socket AM4 3.4GHz Processor with AMD Wraith Stealth cooler MPK",
+    	"price":9975.00,
+    	"image": "image/ryzen5700x.png"
+    },
+    {
+    	"id": 14,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 15,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 16,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 18,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 19,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 20,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 21,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 22,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 23,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 24,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 25,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 26,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 27,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 28,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 29,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 30,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 31,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 32,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 33,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 34,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 35,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 36,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 37,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 38,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 39,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    },
+    {
+    	"id": 40,
+    	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
+    	"price":14795.00,
+    	"image": "image/desktop2.png"
+    }
+]

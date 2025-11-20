@@ -1,0 +1,499 @@
+/* ============================================
+   SMART SOLUTIONS - Page Animations
+   ============================================ */
+
+/* Page Load Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+/* Apply animations to body */
+body {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Header animations */
+header {
+    animation: slideDown 0.6s ease-out;
+}
+
+header .logo img {
+    animation: bounceIn 0.8s ease-out;
+}
+
+header .search-bar {
+    animation: fadeInUp 0.7s ease-out 0.2s backwards;
+}
+
+header .location,
+header .track,
+header .cart,
+header .login {
+    animation: fadeInUp 0.7s ease-out 0.3s backwards;
+}
+
+/* Navigation animations */
+nav, .navbar {
+    animation: slideDown 0.7s ease-out 0.2s backwards;
+}
+
+nav a, .navbar a {
+    transition: all 0.3s ease;
+}
+
+nav a:hover, .navbar a:hover {
+    transform: translateY(-3px);
+    color: #0062F6;
+}
+
+/* Content animations */
+.container,
+.content,
+main,
+section {
+    animation: fadeInUp 0.8s ease-out 0.3s backwards;
+}
+
+/* Product/Item cards animations */
+.product,
+.product-card,
+.item,
+.card,
+.box {
+    animation: fadeInUp 0.6s ease-out backwards;
+    transition: all 0.3s ease;
+}
+
+.product:hover,
+.product-card:hover,
+.item:hover,
+.card:hover,
+.box:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Stagger animation for multiple items */
+.product:nth-child(1),
+.product-card:nth-child(1),
+.item:nth-child(1),
+.card:nth-child(1),
+.box:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.product:nth-child(2),
+.product-card:nth-child(2),
+.item:nth-child(2),
+.card:nth-child(2),
+.box:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.product:nth-child(3),
+.product-card:nth-child(3),
+.item:nth-child(3),
+.card:nth-child(3),
+.box:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.product:nth-child(4),
+.product-card:nth-child(4),
+.item:nth-child(4),
+.card:nth-child(4),
+.box:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.product:nth-child(5),
+.product-card:nth-child(5),
+.item:nth-child(5),
+.card:nth-child(5),
+.box:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.product:nth-child(6),
+.product-card:nth-child(6),
+.item:nth-child(6),
+.card:nth-child(6),
+.box:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+/* Button animations */
+button,
+.btn,
+.delete-btn,
+input[type="submit"],
+input[type="button"],
+a.button {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+button:hover,
+.btn:hover,
+.delete-btn:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+a.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+button:active,
+.btn:active,
+.delete-btn:active,
+input[type="submit"]:active,
+input[type="button"]:active,
+a.button:active {
+    transform: translateY(0);
+}
+
+/* Button ripple effect */
+button::after,
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+button:active::after,
+.btn:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Image animations */
+img {
+    transition: all 0.3s ease;
+}
+
+.product img:hover,
+.product-card img:hover,
+.item img:hover,
+.card img:hover {
+    transform: scale(1.05);
+}
+
+/* Form animations */
+form {
+    animation: fadeInUp 0.8s ease-out 0.2s backwards;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+textarea,
+select {
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+textarea:focus,
+select:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 98, 246, 0.2);
+}
+
+/* Cart animations */
+.cart-item {
+    animation: slideInFromLeft 0.5s ease-out;
+    transition: all 0.3s ease;
+}
+
+.cart-item:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.02);
+}
+
+.cart-counter {
+    animation: pulse 0.5s ease-in-out;
+}
+
+/* Modal/Popup animations */
+.modal,
+.popup {
+    animation: scaleIn 0.3s ease-out;
+}
+
+/* Dropdown animations */
+.dropdown-menu,
+.dropdown-content {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Loading animation */
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Alert/Message animations */
+.alert,
+.message,
+.notification {
+    animation: slideInFromRight 0.5s ease-out;
+}
+
+/* Footer animation */
+footer {
+    animation: fadeInUp 0.8s ease-out 0.5s backwards;
+}
+
+/* Table animations */
+table {
+    animation: fadeInUp 0.8s ease-out 0.3s backwards;
+}
+
+tr {
+    transition: all 0.3s ease;
+}
+
+tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.01);
+}
+
+/* Sidebar animations */
+.sidebar {
+    animation: slideInFromLeft 0.6s ease-out;
+}
+
+/* Gallery/Grid animations */
+.gallery,
+.grid,
+.product-grid {
+    animation: fadeIn 0.8s ease-out;
+}
+
+/* Scroll reveal animation */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s ease-out;
+}
+
+.scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Loading spinner */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Link hover effects */
+a {
+    transition: all 0.3s ease;
+}
+
+/* Breadcrumb animation */
+.breadcrumb {
+    animation: slideInFromLeft 0.6s ease-out 0.3s backwards;
+}
+
+/* Badge/Tag animations */
+.badge,
+.tag {
+    transition: all 0.3s ease;
+}
+
+.badge:hover,
+.tag:hover {
+    transform: scale(1.1);
+}
+
+/* Search bar pulse on focus */
+.search-bar input:focus {
+    animation: pulse 0.5s ease-in-out;
+}
+
+/* Profile picture animation */
+.profile-picture,
+.avatar {
+    transition: all 0.3s ease;
+}
+
+.profile-picture:hover,
+.avatar:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Page transition */
+.page-transition {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Hover grow effect */
+.hover-grow {
+    transition: all 0.3s ease;
+}
+
+.hover-grow:hover {
+    transform: scale(1.05);
+}
+
+/* Smooth color transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Carousel button fix - prevent movement on hover */
+.carousel-btn-outside,
+.carousel-btn,
+.carousel-control,
+.slick-arrow,
+.slider-btn {
+    transition: background-color 0.3s ease, color 0.3s ease, opacity 0.3s ease !important;
+    transform: none !important;
+}
+
+.carousel-btn-outside:hover,
+.carousel-btn:hover,
+.carousel-control:hover,
+.slick-arrow:hover,
+.slider-btn:hover {
+    transform: none !important;
+    opacity: 0.8;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
