@@ -21,15 +21,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['first_name'] = $user['first_name'];
             $_SESSION['profile_picture'] = !empty($user['profile_picture']) ? $user['profile_picture'] : 'image/default-profile.png';
 
-            echo "<script>alert('Login Successful!'); window.location.href='index.php';</script>";
+            // Store success alert in session
+            $_SESSION['alert'] = [
+                'title' => 'Login Successful!',
+                'message' => '<i class="mdi mdi-check-circle" style="font-size: 20px; vertical-align: middle; margin-right: 8px; color: #28a745;"></i>Welcome back, ' . htmlspecialchars($user['first_name']) . '!',
+                'type' => 'success'
+            ];
+            $_SESSION['redirect'] = 'index.php';
+            
+            header("Location: user/register.php");
+            exit();
         } else {
-            echo "<script>alert('Invalid password!'); window.history.back();</script>";
+            // Store error alert in session
+            $_SESSION['alert'] = [
+                'title' => 'Invalid Password!',
+                'message' => '<i class="mdi mdi-lock-alert" style="font-size: 20px; vertical-align: middle; margin-right: 8px; color: #dc3545;"></i>The password you entered is incorrect. Please try again.',
+                'type' => 'error'
+            ];
+            
+            header("Location: user/register.php");
+            exit();
         }
     } else {
-        echo "<script>alert('No account found with this email!'); window.history.back();</script>";
+        // Store error alert in session
+        $_SESSION['alert'] = [
+            'title' => 'Account Not Found!',
+            'message' => '<i class="mdi mdi-email-off" style="font-size: 20px; vertical-align: middle; margin-right: 8px; color: #dc3545;"></i>No account found with this email. Please check and try again.',
+            'type' => 'error'
+        ];
+        
+        header("Location: user/register.php");
+        exit();
     }
-
-    $stmt->close();
 }
 $conn->close();
 ?>
