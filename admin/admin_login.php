@@ -2,7 +2,8 @@
 session_start();
 
 // If already logged in as admin, redirect to dashboard
-if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
+if ((isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) || 
+    (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1)) {
     header("Location: admin_dashboard.php");
     exit();
 }
@@ -17,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Default: admin / admin123
     if ($username === 'admin' && $password === 'admin123') {
         $_SESSION['admin_logged_in'] = true;
+        $_SESSION['is_admin'] = 1; // Set is_admin flag for new system
         $_SESSION['admin_username'] = $username;
         header("Location: admin_dashboard.php");
         exit();

@@ -183,6 +183,33 @@ $conn->close();
             background: #1a252f;
         }
         
+        .btn-ship {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-ship:hover {
+            background: #2980b9;
+        }
+        
+        .btn-process {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-process:hover {
+            background: #d68910;
+        }
+        
+        .btn-complete {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-complete:hover {
+            background: #229954;
+        }
+        
         @media (max-width: 768px) {
             .order-header {
                 grid-template-columns: 1fr;
@@ -205,7 +232,23 @@ $conn->close();
                 <div class="info-row"><strong>Order ID:</strong> #<?php echo htmlspecialchars($order['id']); ?></div>
                 <div class="info-row"><strong>Date:</strong> <?php echo date('M d, Y h:i A', strtotime($order['created_at'])); ?></div>
                 <div class="info-row"><strong>Total Amount:</strong> <span style="color: #2c3e50; font-weight: bold;">₱<?php echo number_format($order['total_price'], 2); ?></span></div>
-                <div class="info-row"><strong>Status:</strong> <span style="background: #d4edda; color: #155724; padding: 3px 8px; border-radius: 3px;">Completed</span></div>
+                <div class="info-row"><strong>Status:</strong> 
+                    <?php
+                        $status = $order['status'] ?? 'Pending';
+                        $status_style = '';
+                        
+                        if (strtolower($status) === 'completed') {
+                            $status_style = 'background: #d4edda; color: #155724;';
+                        } elseif (strtolower($status) === 'shipped') {
+                            $status_style = 'background: #d1ecf1; color: #0c5460;';
+                        } elseif (strtolower($status) === 'processing' || strtolower($status) === 'pending') {
+                            $status_style = 'background: #fff3cd; color: #856404;';
+                        } elseif (strtolower($status) === 'cancelled') {
+                            $status_style = 'background: #f8d7da; color: #721c24;';
+                        }
+                    ?>
+                    <span style="<?php echo $status_style; ?> padding: 3px 8px; border-radius: 3px;"><?php echo ucfirst($status); ?></span>
+                </div>
             </div>
             
             <div class="info-section">
@@ -251,8 +294,39 @@ $conn->close();
         
         <div class="button-group">
             <button class="btn-print" onclick="window.print()">Print Order</button>
+            <button class="btn-ship" onclick="updateOrderStatus('shipped')">Ship Order</button>
+            <button class="btn-complete" onclick="updateOrderStatus('completed')">Mark Completed</button>
+            <button class="btn-process" onclick="updateOrderStatus('processing')">Mark Processing</button>
             <button class="btn-back" onclick="window.location.href='admin_orders.php'">Back to Orders</button>
         </div>
     </div>
+    
+    <script>
+        function updateOrderStatus(status) {
+            if (confirm('Are you sure you want to mark this order as ' + status + '?')) {
+                const formData = new FormData();
+                formData.append('order_id', <?php echo $order_id; ?>);
+                formData.append('status', status);
+                
+                fetch('update_order_status.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Order status updated to: ' + status);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred');
+                });
+            }
+        }
+    </script>
 </body>
 </html>

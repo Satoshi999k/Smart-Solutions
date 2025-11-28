@@ -52,6 +52,7 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Smart Solutions</title>
     <link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         * {
@@ -125,6 +126,22 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT
             margin-right: 10px;
             width: 20px;
             display: inline-block;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
         }
         
         /* Main Content */
@@ -190,7 +207,11 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 32px;
+        }
+        
+        .stat-icon .material-icons {
+            font-size: 32px;
         }
         
         .stat-icon.blue {
@@ -275,6 +296,16 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT
             color: #856404;
         }
         
+        .badge.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .badge.danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
         .action-btn {
             padding: 6px 12px;
             border: none;
@@ -352,12 +383,12 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT
             </div>
             
             <div class="sidebar-menu">
-                <a href="/ITP122/admin/admin_dashboard.php" class="active"><i>📊</i> Dashboard</a>
-                <a href="/ITP122/admin/admin_orders.php"><i>🛒</i> Orders</a>
-                <a href="/ITP122/admin/admin_users.php"><i>👥</i> Users</a>
-                <a href="/ITP122/admin/admin_products.php"><i>📦</i> Products</a>
-                <a href="/ITP122/admin/admin_reports.php"><i>📈</i> Reports</a>
-                <a href="/ITP122/admin/admin_settings.php"><i>⚙️</i> Settings</a>
+                <a href="/ITP122/admin/admin_dashboard.php" class="active"><i class="material-icons">dashboard</i> Dashboard</a>
+                <a href="/ITP122/admin/admin_orders.php"><i class="material-icons">shopping_cart</i> Orders</a>
+                <a href="/ITP122/admin/admin_users.php"><i class="material-icons">people</i> Users</a>
+                <a href="/ITP122/admin/admin_products.php"><i class="material-icons">inventory_2</i> Products</a>
+                <a href="/ITP122/admin/admin_reports.php"><i class="material-icons">trending_up</i> Reports</a>
+                <a href="/ITP122/admin/admin_settings.php"><i class="material-icons">settings</i> Settings</a>
             </div>
         </div>
         
@@ -372,7 +403,7 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon blue">
-                        👥
+                        <i class="material-icons">group</i>
                     </div>
                     <div class="stat-info">
                         <h3><?php echo $total_users; ?></h3>
@@ -382,7 +413,7 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT
                 
                 <div class="stat-card">
                     <div class="stat-icon green">
-                        🛒
+                        <i class="material-icons">shopping_bag</i>
                     </div>
                     <div class="stat-info">
                         <h3><?php echo $total_orders; ?></h3>
@@ -392,7 +423,7 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT
                 
                 <div class="stat-card">
                     <div class="stat-icon orange">
-                        💰
+                        <i class="material-icons">attach_money</i>
                     </div>
                     <div class="stat-info">
                         <h3>₱<?php echo number_format($total_revenue, 2); ?></h3>
@@ -421,7 +452,25 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT
                             <td>#<?php echo $order['id']; ?></td>
                             <td><?php echo date('M d, Y', strtotime($order['created_at'])); ?></td>
                             <td>₱<?php echo number_format($order['total_price'], 2); ?></td>
-                            <td><span class="badge success">Completed</span></td>
+                            <td>
+                                <?php
+                                    $status = $order['status'] ?? 'Pending';
+                                    $badge_class = 'badge success';
+                                    
+                                    if (strtolower($status) === 'completed') {
+                                        $badge_class = 'badge success';
+                                    } elseif (strtolower($status) === 'shipped') {
+                                        $badge_class = 'badge info';
+                                    } elseif (strtolower($status) === 'processing') {
+                                        $badge_class = 'badge warning';
+                                    } elseif (strtolower($status) === 'pending') {
+                                        $badge_class = 'badge warning';
+                                    } elseif (strtolower($status) === 'cancelled') {
+                                        $badge_class = 'badge danger';
+                                    }
+                                ?>
+                                <span class="<?php echo $badge_class; ?>"><?php echo ucfirst($status); ?></span>
+                            </td>
                             <td>
                                 <button class="action-btn view" onclick="viewOrder(<?php echo $order['id']; ?>)">View</button>
                             </td>

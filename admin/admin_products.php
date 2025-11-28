@@ -54,7 +54,10 @@ if (isset($_SESSION['error'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products Management - Admin</title>
     <link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * {
             margin: 0;
@@ -126,6 +129,22 @@ if (isset($_SESSION['error'])) {
             margin-right: 10px;
             width: 20px;
             display: inline-block;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
         }
         
         .main-content {
@@ -244,10 +263,12 @@ if (isset($_SESSION['error'])) {
         }
         
         .badge {
-            padding: 5px 10px;
+            padding: 8px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
+            white-space: nowrap;
+            display: inline-block;
         }
         
         .badge.in-stock {
@@ -261,12 +282,27 @@ if (isset($_SESSION['error'])) {
         }
         
         .action-btn {
-            padding: 6px 12px;
+            padding: 8px 14px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 600;
             margin-right: 5px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            min-width: 70px;
+            text-align: center;
+        }
+        
+        .action-btn.view {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .action-btn.view:hover {
+            background: #1976d2;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
         }
         
         .action-btn.edit {
@@ -274,13 +310,44 @@ if (isset($_SESSION['error'])) {
             color: white;
         }
         
+        .action-btn.edit:hover {
+            background: #f57c00;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+        }
+        
         .action-btn.delete {
             background: #f44336;
             color: white;
         }
         
-        .action-btn:hover {
-            opacity: 0.8;
+        .action-btn.delete:hover {
+            background: #da190b;
+            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+        }
+        
+        .actions-cell {
+            white-space: nowrap;
+            width: 280px;
+        }
+        
+        .product-image-cell {
+            text-align: center;
+            padding: 8px !important;
+        }
+        
+        .product-thumb {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .product-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         
         .no-products {
@@ -324,6 +391,51 @@ if (isset($_SESSION['error'])) {
                 gap: 15px;
             }
         }
+        
+        /* Custom SweetAlert Styles */
+        .custom-delete-btn {
+            background: linear-gradient(135deg, #f44336 0%, #e53935 100%) !important;
+            color: white !important;
+            padding: 14px 24px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+        }
+        
+        .custom-delete-btn:hover {
+            background: linear-gradient(135deg, #e53935 0%, #d32f2f 100%) !important;
+            box-shadow: 0 8px 25px rgba(244, 67, 54, 0.4) !important;
+            transform: translateY(-2px) !important;
+        }
+        
+        .custom-delete-btn:focus {
+            outline: none !important;
+        }
+        
+        .custom-cancel-btn {
+            background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%) !important;
+            color: #2c3e50 !important;
+            padding: 14px 24px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+        }
+        
+        .custom-cancel-btn:hover {
+            background: linear-gradient(135deg, #eeeeee 0%, #e0e0e0 100%) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+            transform: translateY(-2px) !important;
+        }
+        
+        .custom-cancel-btn:focus {
+            outline: none !important;
+        }
     </style>
 </head>
 <body>
@@ -337,12 +449,12 @@ if (isset($_SESSION['error'])) {
             </div>
             
             <div class="sidebar-menu">
-                <a href="/ITP122/admin/admin_dashboard.php"><i>📊</i> Dashboard</a>
-                <a href="/ITP122/admin/admin_orders.php"><i>🛒</i> Orders</a>
-                <a href="/ITP122/admin/admin_users.php"><i>👥</i> Users</a>
-                <a href="/ITP122/admin/admin_products.php" class="active"><i>📦</i> Products</a>
-                <a href="/ITP122/admin/admin_reports.php"><i>📈</i> Reports</a>
-                <a href="/ITP122/admin/admin_settings.php"><i>⚙️</i> Settings</a>
+                <a href="/ITP122/admin/admin_dashboard.php"><i class="material-icons">dashboard</i> Dashboard</a>
+                <a href="/ITP122/admin/admin_orders.php"><i class="material-icons">shopping_cart</i> Orders</a>
+                <a href="/ITP122/admin/admin_users.php"><i class="material-icons">people</i> Users</a>
+                <a href="/ITP122/admin/admin_products.php" class="active"><i class="material-icons">inventory_2</i> Products</a>
+                <a href="/ITP122/admin/admin_reports.php"><i class="material-icons">trending_up</i> Reports</a>
+                <a href="/ITP122/admin/admin_settings.php"><i class="material-icons">settings</i> Settings</a>
             </div>
         </div>
         
@@ -389,6 +501,7 @@ if (isset($_SESSION['error'])) {
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Image</th>
                             <th>Product Name</th>
                             <th>Category</th>
                             <th>Price</th>
@@ -401,6 +514,15 @@ if (isset($_SESSION['error'])) {
                         <?php foreach ($products as $product): ?>
                         <tr>
                             <td><?php echo $product['id']; ?></td>
+                            <td class="product-image-cell">
+                                <?php 
+                                    $image_path = $product['image'] ?? 'image/default-product.png';
+                                    if (!preg_match('/^(\/|http)/', $image_path)) {
+                                        $image_path = '../' . $image_path;
+                                    }
+                                ?>
+                                <img src="<?php echo htmlspecialchars($image_path); ?>" alt="Product" class="product-thumb" onerror="this.src='../image/default-product.png'">
+                            </td>
                             <td><?php echo htmlspecialchars($product['name']); ?></td>
                             <td><?php echo htmlspecialchars($product['category'] ?? 'N/A'); ?></td>
                             <td>₱<?php echo number_format($product['price'], 2); ?></td>
@@ -410,7 +532,8 @@ if (isset($_SESSION['error'])) {
                                     <?php echo (isset($product['stock']) ? $product['stock'] : 0) > 5 ? 'In Stock' : 'Low Stock'; ?>
                                 </span>
                             </td>
-                            <td>
+                            <td class="actions-cell">
+                                <button class="action-btn view" onclick="viewProduct(<?php echo $product['id']; ?>)">View</button>
                                 <button class="action-btn edit" onclick="editProduct(<?php echo $product['id']; ?>)">Edit</button>
                                 <button class="action-btn delete" onclick="deleteProduct(<?php echo $product['id']; ?>)">Delete</button>
                             </td>
@@ -432,12 +555,182 @@ if (isset($_SESSION['error'])) {
             window.location.href = 'admin_add_product.php';
         }
         
+        function viewProduct(id) {
+            // Fetch product details via AJAX
+            $.ajax({
+                url: 'get_product_details.php',
+                method: 'GET',
+                data: { id: id },
+                dataType: 'json',
+                success: function(product) {
+                    let imagePath = product.image;
+                    // Adjust image path for proper display
+                    if (!imagePath.startsWith('/') && !imagePath.startsWith('http')) {
+                        imagePath = '../' + imagePath;
+                    }
+                    
+                    let stockClass = product.stock > 5 ? 'in-stock' : 'low-stock';
+                    let stockText = product.stock > 5 ? 'In Stock' : 'Low Stock';
+                    
+                    let htmlContent = `
+                        <div style="text-align: left; display: flex; gap: 30px;">
+                            <div style="flex: 0 0 40%; text-align: center;">
+                                <img src="${imagePath}" alt="${product.name}" style="max-width: 100%; height: auto; border-radius: 10px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <h3 style="color: #2c3e50; margin-bottom: 15px; font-size: 20px;">${product.name}</h3>
+                                <p style="margin: 10px 0;"><strong>Price:</strong> <span style="color: #e74c3c; font-size: 18px; font-weight: bold;">₱${parseFloat(product.price).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></p>
+                                <p style="margin: 10px 0;"><strong>Category:</strong> ${product.category || 'N/A'}</p>
+                                <p style="margin: 10px 0;"><strong>Stock:</strong> <span style="padding: 5px 10px; border-radius: 20px; font-weight: 600; background: ${stockClass === 'in-stock' ? '#d4edda' : '#fff3cd'}; color: ${stockClass === 'in-stock' ? '#155724' : '#856404'}">${product.stock} units</span></p>
+                                <p style="margin: 10px 0;"><strong>Product ID:</strong> #${product.id}</p>
+                                ${product.description ? `<div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;"><strong>Description:</strong><br>${product.description}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    Swal.fire({
+                        title: 'Product Details',
+                        html: htmlContent,
+                        icon: 'info',
+                        width: 800,
+                        showCancelButton: true,
+                        confirmButtonText: 'Edit',
+                        cancelButtonText: 'Close',
+                        confirmButtonColor: '#ff9800',
+                        cancelButtonColor: '#95a5a6'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = 'admin_edit_product.php?id=' + id;
+                        }
+                    });
+                },
+                error: function() {
+                    Swal.fire('Error', 'Failed to load product details', 'error');
+                }
+            });
+        }
+        
         function editProduct(id) {
             window.location.href = 'admin_edit_product.php?id=' + id;
         }
         
         function deleteProduct(id) {
-            window.location.href = 'admin_delete_product.php?id=' + id;
+            // Fetch product details
+            fetch('get_product_details.php?id=' + id)
+                .then(res => res.json())
+                .then(product => {
+                    if (!product) {
+                        Swal.fire('Error', 'Product not found!', 'error');
+                        return;
+                    }
+                    
+                    Swal.fire({
+                        title: 'Delete Product',
+                        icon: 'warning',
+                        html: `
+                            <div style="text-align: left;">
+                                <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #f44336;">
+                                    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+                                        <span style="font-weight: 600; color: #2c3e50; display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-family: 'Material Icons'; font-size: 18px; color: #667eea;">fingerprint</span>
+                                            Product ID
+                                        </span>
+                                        <span style="color: #34495e; font-weight: 500;">${product.id}</span>
+                                    </div>
+                                    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+                                        <span style="font-weight: 600; color: #2c3e50; display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-family: 'Material Icons'; font-size: 18px; color: #667eea;">local_offer</span>
+                                            Product Name
+                                        </span>
+                                        <span style="color: #34495e; font-weight: 500;">${product.name}</span>
+                                    </div>
+                                    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+                                        <span style="font-weight: 600; color: #2c3e50; display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-family: 'Material Icons'; font-size: 18px; color: #667eea;">attach_money</span>
+                                            Price
+                                        </span>
+                                        <span style="color: #34495e; font-weight: 500;">₱${parseFloat(product.price).toFixed(2)}</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+                                        <span style="font-weight: 600; color: #2c3e50; display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-family: 'Material Icons'; font-size: 18px; color: #667eea;">inventory_2</span>
+                                            Stock
+                                        </span>
+                                        <span style="color: #34495e; font-weight: 500;">${product.stock} units</span>
+                                    </div>
+                                </div>
+                                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 10px; padding: 15px; display: flex; gap: 12px; align-items: flex-start;">
+                                    <span style="font-family: 'Material Icons'; font-size: 20px; color: #ff9800; flex-shrink: 0; margin-top: 2px;">warning_amber</span>
+                                    <div style="text-align: left;">
+                                        <div style="color: #856404; font-size: 13px; line-height: 1.6; font-weight: 500;">
+                                            <strong>This action cannot be undone.</strong> This product will be permanently deleted from the database and cannot be recovered.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonColor: '#f44336',
+                        cancelButtonColor: '#757575',
+                        confirmButtonText: 'Delete',
+                        cancelButtonText: 'Cancel',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'custom-delete-btn',
+                            cancelButton: 'custom-cancel-btn'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            deleteProductConfirmed(id);
+                        }
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    Swal.fire('Error', 'Failed to load product details', 'error');
+                });
+        }
+        
+        function deleteProductConfirmed(id) {
+            // Show loading state
+            Swal.fire({
+                title: 'Deleting...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Send delete request
+            fetch('admin_delete_product.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'id=' + id + '&confirm_delete=1'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Deleted!',
+                        text: 'Product has been deleted successfully.',
+                        icon: 'success',
+                        confirmButtonColor: '#667eea'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to delete product', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'An error occurred while deleting the product', 'error');
+            });
         }
     </script>
 </body>

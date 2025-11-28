@@ -28,8 +28,11 @@ if (isset($_SESSION['user_id'])) {
           UNIQUE KEY `user_product` (`user_id`, `product_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
         
-        // Load cart items from database
-        $query = "SELECT product_id, quantity FROM shopping_cart WHERE user_id = ?";
+        // Load cart items from database with product details
+        $query = "SELECT sc.product_id as id, p.name, p.price, p.image, sc.quantity 
+                  FROM shopping_cart sc
+                  LEFT JOIN products p ON sc.product_id = p.id
+                  WHERE sc.user_id = ?";
         $stmt = $conn->prepare($query);
         
         if ($stmt) {
@@ -37,40 +40,13 @@ if (isset($_SESSION['user_id'])) {
             $stmt->execute();
             $result = $stmt->get_result();
             
-            // Initialize or update session cart from database
-            if ($result->num_rows > 0) {
-                // If there are items in database, load them
-                if (!isset($_SESSION['cart'])) {
-                    $_SESSION['cart'] = [];
-                }
-                
-                // Note: We load from DB but don't overwrite session completely
-                // This is because user might have added items to session that aren't in DB yet
-                while ($row = $result->fetch_assoc()) {
-                    $product_id = $row['product_id'];
-                    $quantity = $row['quantity'];
-                    
-                    // Check if this product is already in session
-                    $found = false;
-                    for ($i = 0; $i < count($_SESSION['cart']); $i++) {
-                        if ($_SESSION['cart'][$i]['id'] == $product_id) {
-                            // Update to DB quantity (DB is source of truth)
-                            $_SESSION['cart'][$i]['quantity'] = $quantity;
-                            $found = true;
-                            break;
-                        }
-                    }
-                    
-                    // If not in session but in DB, add it
-                    if (!$found) {
-                        $_SESSION['cart'][] = [
-                            'id' => $product_id,
-                            'name' => 'Product ' . $product_id,
-                            'price' => 0,
-                            'image' => '',
-                            'quantity' => $quantity
-                        ];
-                    }
+            // Replace session cart with database cart (database is source of truth)
+            $_SESSION['cart'] = [];
+            
+            while ($row = $result->fetch_assoc()) {
+                // Only add items with valid product data (not null)
+                if (!empty($row['name']) && !empty($row['price'])) {
+                    $_SESSION['cart'][] = $row;
                 }
             }
             

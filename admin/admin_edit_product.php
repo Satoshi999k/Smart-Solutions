@@ -30,10 +30,13 @@ $check_result = $conn->query("SELECT * FROM products WHERE id = $product_id");
 
 if ($check_result->num_rows == 0) {
     $_SESSION['error'] = "Product not found!";
-    header("Location: products.php");
+    header("Location: admin_products.php");
     $conn->close();
     exit();
 }
+
+// Fetch product data
+$product = $check_result->fetch_assoc();
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -43,45 +46,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $category = $conn->real_escape_string($_POST['category']);
     $description = $conn->real_escape_string($_POST['description']);
     $image = $product['image']; // Default to existing image
+    $upload_error = false;
     
     // Handle image upload
     if (!empty($_FILES['image']['name'])) {
         $target_dir = "../image/";
         $file_name = basename($_FILES['image']['name']);
-        $target_file = $target_dir . $file_name;
+        
+        // Add timestamp to make filename unique
+        $unique_filename = time() . '_' . $file_name;
+        $target_file = $target_dir . $unique_filename;
         $file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
         
+        // Check for upload errors
+        if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            $upload_errors = array(
+                UPLOAD_ERR_INI_SIZE => "File exceeds upload_max_filesize",
+                UPLOAD_ERR_FORM_SIZE => "File exceeds form MAX_FILE_SIZE",
+                UPLOAD_ERR_PARTIAL => "File was only partially uploaded",
+                UPLOAD_ERR_NO_FILE => "No file was uploaded",
+                UPLOAD_ERR_NO_TMP_DIR => "Missing temporary folder",
+                UPLOAD_ERR_CANT_WRITE => "Failed to write file to disk",
+                UPLOAD_ERR_EXTENSION => "File upload stopped by extension"
+            );
+            $error_msg = isset($upload_errors[$_FILES['image']['error']]) 
+                ? $upload_errors[$_FILES['image']['error']] 
+                : "Unknown upload error";
+            $_SESSION['error'] = "Upload failed: " . $error_msg;
+            $upload_error = true;
+        }
         // Validate file type
-        $allowed_types = array('jpg', 'jpeg', 'png', 'gif');
-        if (in_array($file_type, $allowed_types)) {
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
-                $image = $target_file;
+        else if (!in_array($file_type, array('jpg', 'jpeg', 'png', 'gif'))) {
+            $_SESSION['error'] = "Invalid file type. Only JPG, PNG, and GIF are allowed.";
+            $upload_error = true;
+        }
+        // Check file size (max 5MB)
+        else if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
+            $_SESSION['error'] = "File is too large. Maximum size is 5MB.";
+            $upload_error = true;
+        }
+        else {
+            // Check if directory exists, create if not
+            if (!is_dir($target_dir)) {
+                if (!mkdir($target_dir, 0755, true)) {
+                    $_SESSION['error'] = "Failed to create image directory.";
+                    $upload_error = true;
+                }
+            }
+            
+            if (!$upload_error && is_writable($target_dir)) {
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                    // Store relative path for database
+                    $image = 'image/' . $unique_filename;
+                } else {
+                    $_SESSION['error'] = "Failed to move uploaded file. Permissions may be restricted.";
+                    $upload_error = true;
+                }
+            } else if (!$upload_error) {
+                $_SESSION['error'] = "Image directory is not writable. Check folder permissions.";
+                $upload_error = true;
             }
         }
     }
     
-    $update_query = "UPDATE products SET 
-                    name = '$name', 
-                    price = $price, 
-                    stock = $stock, 
-                    category = '$category', 
-                    description = '$description',
-                    image = '$image'
-                    WHERE id = $product_id";
-    
-    if ($conn->query($update_query) === TRUE) {
-        $_SESSION['success'] = "Product updated successfully!";
-        header("Location: products.php");
-        $conn->close();
-        exit();
-    } else {
-        $error = "Error updating product: " . $conn->error;
+    // Only update database if no upload errors
+    if (!$upload_error) {
+        $update_query = "UPDATE products SET 
+                        name = '$name', 
+                        price = $price, 
+                        stock = $stock, 
+                        category = '$category', 
+                        description = '$description',
+                        image = '$image'
+                        WHERE id = $product_id";
+        
+        if ($conn->query($update_query) === TRUE) {
+            $_SESSION['success'] = "Product updated successfully!";
+            header("Location: admin_products.php");
+            $conn->close();
+            exit();
+        } else {
+            $error = "Error updating product: " . $conn->error;
+        }
     }
 }
 
-// Fetch product data
-$product = $check_result->fetch_assoc();
-$conn->close();
+// Connection already made above, no need to close and reopen
 ?>
 <!DOCTYPE html>
 <html>
@@ -218,11 +268,28 @@ $conn->close();
             margin-bottom: 20px;
             border-left: 4px solid #f44336;
         }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4caf50;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Edit Product</h1>
+        
+        <?php if (isset($_SESSION['error'])): ?>
+        <div class="error"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></div>
+        <?php endif; ?>
+        
+        <?php if (isset($_SESSION['success'])): ?>
+        <div class="success"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></div>
+        <?php endif; ?>
         
         <?php if (isset($error)): ?>
         <div class="error"><?php echo $error; ?></div>
@@ -232,14 +299,21 @@ $conn->close();
             <?php if (!empty($product['image'])): ?>
             <div class="image-preview">
                 <p><strong>Current Image:</strong></p>
-                <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                <?php 
+                    $image_path = $product['image'];
+                    // If image path doesn't start with '/' or 'http', prepend '../'
+                    if (!preg_match('/^(\/|http)/', $image_path)) {
+                        $image_path = '../' . $image_path;
+                    }
+                ?>
+                <img src="<?php echo htmlspecialchars($image_path); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
             </div>
             <?php endif; ?>
             
             <div class="form-group">
                 <label for="image">Upload New Image</label>
-                <input type="file" id="image" name="image" accept="../image/*">
-                <p style="color: #999; font-size: 12px; margin-top: 5px;">Accepted: JPG, JPEG, PNG, GIF</p>
+                <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif,image/jpg">
+                <p style="color: #999; font-size: 12px; margin-top: 5px;">Accepted: JPG, JPEG, PNG, GIF (Max 5MB)</p>
             </div>
             
             <div class="form-group">
@@ -275,3 +349,4 @@ $conn->close();
     </div>
 </body>
 </html>
+<?php $conn->close(); ?>

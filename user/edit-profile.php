@@ -26,20 +26,25 @@ if (isset($_POST['upload_picture'])) {
         
         if (in_array(strtolower($filetype), $allowed)) {
             $new_filename = 'profile_' . $user_id . '_' . time() . '.' . $filetype;
-            $upload_path = 'uploads/' . $new_filename;
+            // Use relative path from root directory
+            $upload_path = '../uploads/' . $new_filename;
             
             // Create uploads directory if it doesn't exist
-            if (!file_exists('uploads')) {
-                mkdir('uploads', 0777, true);
+            if (!file_exists('../uploads')) {
+                mkdir('../uploads', 0777, true);
             }
             
             if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $upload_path)) {
+                // Store path relative to root in database
+                $db_path = 'uploads/' . $new_filename;
                 $update_pic = "UPDATE users SET profile_picture = ? WHERE id = ?";
                 $stmt = $conn->prepare($update_pic);
-                $stmt->bind_param("si", $upload_path, $user_id);
+                $stmt->bind_param("si", $db_path, $user_id);
                 
                 if ($stmt->execute()) {
                     $success_message = "Profile picture updated successfully!";
+                    // Update the profile picture variable for display
+                    $profile_picture = '../' . $db_path;
                 } else {
                     $error_message = "Error updating profile picture in database.";
                 }
@@ -88,14 +93,32 @@ if (isset($_POST['update_profile'])) {
 // Fetch user details
 $query = "SELECT * FROM users WHERE id = ?";
 $stmt = $conn->prepare($query);
+if (!$stmt) {
+    die("Prepare failed: " . $conn->error);
+}
 $stmt->bind_param("i", $user_id);
-$stmt->execute();
+if (!$stmt->execute()) {
+    die("Execute failed: " . $stmt->error);
+}
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
+if (!$user) {
+    die("User not found or query returned no results");
+}
 $stmt->close();
 
-// Get profile picture
-$profile_picture = !empty($user['profile_picture']) ? $user['profile_picture'] : '../image/login-icon.png';
+// Get profile picture - handle both uploaded and default profiles
+$profile_picture = 'image/default-profile.png';
+if (!empty($user['profile_picture'])) {
+    $pic_path = $user['profile_picture'];
+    // If path starts with 'uploads/', prepend ../
+    if (strpos($pic_path, 'uploads/') === 0) {
+        $profile_picture = '../' . $pic_path;
+    } else {
+        // If it's already a full path, use it
+        $profile_picture = $pic_path;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -107,106 +130,195 @@ $profile_picture = !empty($user['profile_picture']) ? $user['profile_picture'] :
     <meta charset="UTF-8">
     <title>Edit Profile - SMARTSOLUTIONS</title>
     <style>
-        .edit-profile-container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        @keyframes slideDownMenu {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
+        #main-menu {
+            animation: slideDownMenu 0.6s ease-out 0.3s both;
+        }
+        
+        .edit-profile-container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 40px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 98, 246, 0.12);
+            animation: slideInDown 0.6s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .edit-profile-container h2 {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             color: #333;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
+
         .profile-picture-section {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 8px;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f9ff 0%, #f0f5ff 100%);
+            border-radius: 12px;
+            border: 2px solid #e0ecff;
+            transition: all 0.3s ease;
         }
+
+        .profile-picture-section:hover {
+            box-shadow: 0 8px 24px rgba(0, 98, 246, 0.15);
+        }
+
         .profile-picture-preview {
-            width: 150px;
-            height: 150px;
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 20px;
-            border: 4px solid #ddd;
+            margin-bottom: 24px;
+            border: 6px solid white;
+            box-shadow: 0 8px 24px rgba(0, 98, 246, 0.2);
+            transition: transform 0.3s ease;
         }
+
+        .profile-picture-preview:hover {
+            transform: scale(1.05);
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
+
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #0062F6;
         }
+
         .form-group input,
         .form-group textarea {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
             box-sizing: border-box;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
         }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0062F6;
+            box-shadow: 0 0 0 4px rgba(0, 98, 246, 0.1);
+            background: #ffffff;
+        }
+
         .form-group textarea {
             resize: vertical;
-            min-height: 80px;
+            min-height: 100px;
         }
+
         .form-row {
             display: flex;
-            gap: 20px;
+            gap: 24px;
         }
+
         .form-row .form-group {
             flex: 1;
         }
+
         .btn {
-            padding: 12px 30px;
+            padding: 14px 32px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
         }
+
         .btn-primary {
-            background-color: #007BFF;
+            background: linear-gradient(135deg, #0062F6 0%, #0052D4 100%);
             color: white;
+            box-shadow: 0 4px 12px rgba(0, 98, 246, 0.3);
         }
+
         .btn-primary:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 98, 246, 0.4);
         }
+
         .btn-secondary {
-            background-color: #6c757d;
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
             color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
+
         .btn-secondary:hover {
-            background-color: #545b62;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
+
         .button-group {
             display: flex;
-            gap: 15px;
+            gap: 16px;
             justify-content: center;
-            margin-top: 30px;
+            margin-top: 40px;
+            flex-wrap: wrap;
         }
+
         .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            border-radius: 10px;
             text-align: center;
+            font-weight: 500;
+            animation: slideInDown 0.5s ease-out;
         }
+
         .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+            color: #059669;
+            border: 2px solid rgba(16, 185, 129, 0.3);
         }
+
         .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+            color: #dc2626;
+            border: 2px solid rgba(220, 38, 38, 0.3);
         }
         html, body {
             height: 100%;
@@ -231,14 +343,15 @@ $profile_picture = !empty($user['profile_picture']) ? $user['profile_picture'] :
         </div>
         <div class="search-bar">
             <input type="text" placeholder="Search">
-            <div class="search-icon"></div>
+            <img class="search-icon" src="../image/search-icon.png" alt="Search" style="width: 20px; height: 20px; cursor: pointer;">
         </div>
-        <a href="location.php"><div class="location">
-            <img class="location" src="../image/location-icon.png" alt="location-icon">
+        <a href="../pages/location.php">
+            <div class="location">
+                <img class="location" src="../image/location-icon.png" alt="location-icon">
+            </div>
         </a>
-        </div>
         <div class="track">
-            <a href="../track.php"><img class="track" src="../image/track-icon.png" alt="track-icon"></a>
+            <a href="../pages/track.php"><img class="track" src="../image/track-icon.png" alt="track-icon"></a>
         </div>
         <a href="../cart.php">
             <div class="cart">
@@ -273,30 +386,38 @@ $profile_picture = !empty($user['profile_picture']) ? $user['profile_picture'] :
         </style>
 
        <div class="login profile-dropdown">
-        <a href="javascript:void(0)" onclick="toggleDropdown()">
-            <img class="login" 
-                 src="<?php echo $profile_picture; ?>" 
-                 alt="profile-icon" 
-                 style="border-radius: 50%; width: 40px; height: 40px; object-fit: cover;">
-        </a>
-        <div id="dropdown-menu" class="dropdown-content">
-            <a href="profile.php">View Profile</a>
-            <a href="edit-profile.php">Edit Profile</a>
-            <a href="logout.php">Log Out</a>
-        </div>
+            <a href="javascript:void(0)" onclick="toggleDropdown()">
+                <img class="login" 
+                    src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
+                    alt="login-icon" 
+                    style="border-radius: <?php echo isset($_SESSION['user_id']) ? '50%' : '0'; ?>; 
+                            width: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>; 
+                            height: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>;">
+            </a>
+            <div id="dropdown-menu" class="dropdown-content">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="profile.php">View Profile</a>
+                    <a href="edit-profile.php">Edit Profile</a>
+                    <a href="logout.php">Log Out</a>
+                <?php endif; ?>
+            </div>
         </div>
         <div class="login-text">
-            <a href="edit-profile.php"></a>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="profile.php"></a>
+            <?php else: ?>
+                <a href="register.php"><p>Login/<br>Sign In</p></a>
+            <?php endif; ?>
         </div>
     </div>
     </header>
 
-    <div class="menu">
+    <div class="menu" id="main-menu">
         <a href="../index.php">HOME</a>
-        <a href="../product.php">PRODUCTS</a>
-        <a href="../desktop.php">DESKTOP</a>
-        <a href="../laptop.php">LAPTOP</a>
-        <a href="../brands.php">BRANDS</a>
+        <a href="../pages/product.php">PRODUCTS</a>
+        <a href="../products/desktop.php">DESKTOP</a>
+        <a href="../products/laptop.php">LAPTOP</a>
+        <a href="../pages/brands.php">BRANDS</a>
     </div>
 
     <div class="breadcrumb">
@@ -322,7 +443,7 @@ $profile_picture = !empty($user['profile_picture']) ? $user['profile_picture'] :
                 <form method="POST" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="profile_picture">Upload New Profile Picture</label>
-                        <input type="file" id="profile_picture" name="profile_picture" accept="../image/*">
+                        <input type="file" id="profile_picture" name="profile_picture" accept="image/*" required>
                     </div>
                     <button type="submit" name="upload_picture" class="btn btn-secondary">Upload Picture</button>
                 </form>
@@ -333,32 +454,32 @@ $profile_picture = !empty($user['profile_picture']) ? $user['profile_picture'] :
                 <div class="form-row">
                     <div class="form-group">
                         <label for="first_name">First Name *</label>
-                        <input type="text" id="first_name" name="first_name" value="<?php echo htmlspecialchars($user['first_name']); ?>" required>
+                        <input type="text" id="first_name" name="first_name" value="<?php echo isset($user['first_name']) ? htmlspecialchars($user['first_name']) : ''; ?>" required>
                     </div>
                     <div class="form-group">
                         <label for="last_name">Last Name *</label>
-                        <input type="text" id="last_name" name="last_name" value="<?php echo htmlspecialchars($user['last_name']); ?>" required>
+                        <input type="text" id="last_name" name="last_name" value="<?php echo isset($user['last_name']) ? htmlspecialchars($user['last_name']) : ''; ?>" required>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email *</label>
-                    <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                    <input type="email" id="email" name="email" value="<?php echo isset($user['email']) ? htmlspecialchars($user['email']) : ''; ?>" required>
                 </div>
 
                 <div class="form-group">
                     <label for="phone_number">Phone Number *</label>
-                    <input type="text" id="phone_number" name="phone_number" value="<?php echo htmlspecialchars($user['phone_number'] ?? ''); ?>" required>
+                    <input type="text" id="phone_number" name="phone_number" value="<?php echo isset($user['phone_number']) ? htmlspecialchars($user['phone_number']) : ''; ?>" required>
                 </div>
 
                 <div class="form-group">
                     <label for="address">Address *</label>
-                    <textarea id="address" name="address" required><?php echo htmlspecialchars($user['address'] ?? ''); ?></textarea>
+                    <textarea id="address" name="address" required><?php echo isset($user['address']) ? htmlspecialchars($user['address']) : ''; ?></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="postal_code">Postal Code *</label>
-                    <input type="text" id="postal_code" name="postal_code" value="<?php echo htmlspecialchars($user['postal_code'] ?? ''); ?>" required>
+                    <input type="text" id="postal_code" name="postal_code" value="<?php echo isset($user['postal_code']) ? htmlspecialchars($user['postal_code']) : ''; ?>" required>
                 </div>
 
                 <div class="form-group">
@@ -437,6 +558,8 @@ $profile_picture = !empty($user['profile_picture']) ? $user['profile_picture'] :
             }
         }
     </script>
-<script src="js/search.js"></script>
+<script src="../js/search.js"></script>
+<script src="../js/header-animations.js"></script>
+<script src="../js/jquery-animations.js"></script>
 </body>
 </html>

@@ -22,6 +22,7 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users Management - Admin</title>
     <link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         * {
@@ -94,6 +95,22 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
             margin-right: 10px;
             width: 20px;
             display: inline-block;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
         }
         
         .main-content {
@@ -169,12 +186,17 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
         }
         
         .action-btn {
-            padding: 6px 12px;
+            padding: 8px 14px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 600;
             margin-right: 5px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            min-width: 70px;
+            text-align: center;
         }
         
         .action-btn.view {
@@ -182,13 +204,24 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
             color: white;
         }
         
+        .action-btn.view:hover {
+            background: #1976d2;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+        
         .action-btn.delete {
             background: #f44336;
             color: white;
         }
         
-        .action-btn:hover {
-            opacity: 0.8;
+        .action-btn.delete:hover {
+            background: #da190b;
+            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+        }
+        
+        .actions-cell {
+            white-space: nowrap;
+            width: 180px;
         }
         
         .no-data {
@@ -220,12 +253,12 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
             </div>
             
             <div class="sidebar-menu">
-                <a href="/ITP122/admin/admin_dashboard.php"><i>📊</i> Dashboard</a>
-                <a href="/ITP122/admin/admin_orders.php"><i>🛒</i> Orders</a>
-                <a href="/ITP122/admin/admin_users.php" class="active"><i>👥</i> Users</a>
-                <a href="/ITP122/admin/admin_products.php"><i>📦</i> Products</a>
-                <a href="/ITP122/admin/admin_reports.php"><i>📈</i> Reports</a>
-                <a href="/ITP122/admin/admin_settings.php"><i>⚙️</i> Settings</a>
+                <a href="/ITP122/admin/admin_dashboard.php"><i class="material-icons">dashboard</i> Dashboard</a>
+                <a href="/ITP122/admin/admin_orders.php"><i class="material-icons">shopping_cart</i> Orders</a>
+                <a href="/ITP122/admin/admin_users.php" class="active"><i class="material-icons">people</i> Users</a>
+                <a href="/ITP122/admin/admin_products.php"><i class="material-icons">inventory_2</i> Products</a>
+                <a href="/ITP122/admin/admin_reports.php"><i class="material-icons">trending_up</i> Reports</a>
+                <a href="/ITP122/admin/admin_settings.php"><i class="material-icons">settings</i> Settings</a>
             </div>
         </div>
         
@@ -269,7 +302,7 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
                             <td><?php echo htmlspecialchars($user['phone_number'] ?? 'N/A'); ?></td>
                             <td><?php echo htmlspecialchars(substr($user['address'] ?? 'N/A', 0, 30)); ?></td>
                             <td><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
-                            <td>
+                            <td class="actions-cell">
                                 <button class="action-btn view" onclick="viewUser(<?php echo $user['id']; ?>)">View</button>
                                 <button class="action-btn delete" onclick="deleteUser(<?php echo $user['id']; ?>)">Delete</button>
                             </td>

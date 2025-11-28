@@ -1,12 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="../css/design.css" />
-<link rel="stylesheet" href="../css/animations.css" />
-<title>BRANDS - SMART SOLUTIONS</title>
-</head>
 <?php
 // Start session to check if the user is logged in
 session_start();
@@ -35,6 +26,40 @@ if (isset($_SESSION['user_id'])) {
 }
 $conn->close();
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../css/design.css" />
+<link rel="stylesheet" href="../css/animations.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+<title>BRANDS - SMART SOLUTIONS</title>
+<style>
+    body.brands { background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%) !important; }
+    .breadcrumb { padding: 16px 24px; font-size: 14px; color: #555; background: transparent; }
+    .breadcrumb a { color: #0062F6; text-decoration: none; font-weight: 500; transition: color 0.3s ease; }
+    .breadcrumb a:hover { color: #0052D4; }
+    .brands-intro { background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%); padding: 60px 40px; text-align: center; }
+    .brands-intro h1 { font-size: 42px; color: #0062F6; margin-bottom: 60px; font-weight: 700; animation: slideInDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); letter-spacing: 2px; }
+    .brands-intro p { font-size: 15px; color: #2c3e50; line-height: 1.9; margin: 0 auto 0px; max-width: 900px; background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%); padding: 32px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 98, 246, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 98, 246, 0.1); animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; }
+    .brands-intro p::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #0062F6 0%, #0052D4 100%); transform: scaleX(0); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .brands-intro p:hover::before { transform: scaleX(1); }
+    .brands-intro p:hover { transform: translateY(-8px); box-shadow: 0 16px 48px rgba(0, 98, 246, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08); border-color: rgba(0, 98, 246, 0.2); background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%); }
+    .brands-intro p:nth-of-type(1) { animation-delay: 0.1s; }
+    .brands-intro p:nth-of-type(2) { animation-delay: 0.2s; }
+    .brands-intro p:nth-of-type(3) { animation-delay: 0.3s; }
+    .brands-intro p:nth-of-type(4) { animation-delay: 0.4s; }
+    .logo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; padding: 0px 30px 50px 30px; max-width: 1400px; margin: 0 auto; background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%); }
+    .logo-grid img { background: white; border: 2px solid #e8f1ff; border-radius: 12px; padding: 16px; height: auto; max-height: 100px; width: 100%; object-fit: contain; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 16px rgba(0, 98, 246, 0.08); position: relative; overflow: visible; animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+    .logo-grid img:nth-child(1) { animation-delay: 0.1s; } .logo-grid img:nth-child(2) { animation-delay: 0.15s; } .logo-grid img:nth-child(3) { animation-delay: 0.2s; } .logo-grid img:nth-child(4) { animation-delay: 0.25s; } .logo-grid img:nth-child(5) { animation-delay: 0.3s; } .logo-grid img:nth-child(6) { animation-delay: 0.35s; } .logo-grid img:nth-child(7) { animation-delay: 0.4s; } .logo-grid img:nth-child(8) { animation-delay: 0.45s; } .logo-grid img:nth-child(9) { animation-delay: 0.5s; } .logo-grid img:nth-child(10) { animation-delay: 0.55s; } .logo-grid img:nth-child(11) { animation-delay: 0.6s; } .logo-grid img:nth-child(12) { animation-delay: 0.65s; } .logo-grid img:nth-child(13) { animation-delay: 0.7s; } .logo-grid img:nth-child(14) { animation-delay: 0.75s; } .logo-grid img:nth-child(15) { animation-delay: 0.8s; } .logo-grid img:nth-child(16) { animation-delay: 0.85s; } .logo-grid img:nth-child(17) { animation-delay: 0.9s; } .logo-grid img:nth-child(18) { animation-delay: 0.95s; } .logo-grid img:nth-child(19) { animation-delay: 1s; } .logo-grid img:nth-child(20) { animation-delay: 1.05s; } .logo-grid img:nth-child(21) { animation-delay: 1.1s; } .logo-grid img:nth-child(22) { animation-delay: 1.15s; } .logo-grid img:nth-child(23) { animation-delay: 1.2s; } .logo-grid img:nth-child(24) { animation-delay: 1.25s; } .logo-grid img:nth-child(25) { animation-delay: 1.3s; } .logo-grid img:nth-child(26) { animation-delay: 1.35s; } .logo-grid img:nth-child(27) { animation-delay: 1.4s; } .logo-grid img:nth-child(28) { animation-delay: 1.45s; }
+    .logo-grid img:hover { transform: translateY(-12px) scale(1.1); box-shadow: 0 16px 48px rgba(0, 98, 246, 0.25); border-color: #0062F6; background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%); }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 768px) { .brands-intro { padding: 40px 24px; } .brands-intro h1 { font-size: 32px; margin-bottom: 40px; } .brands-intro p { font-size: 14px; padding: 24px; } .logo-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; padding: 30px 20px; } .logo-grid img { max-height: 80px; } }
+    @media (max-width: 480px) { .brands-intro { padding: 30px 16px; } .brands-intro h1 { font-size: 24px; margin-bottom: 30px; } .brands-intro p { font-size: 13px; padding: 18px; } .logo-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; padding: 20px 12px; } .logo-grid img { max-height: 70px; } }
+</style>
+</head>
 <body class="brands">
     <header>
       <div class="ssheader">
@@ -122,15 +147,12 @@ $conn->close();
             <a href="../pages/brands.php" style="font-weight: bold;">BRANDS</a>
     </div>
 
-    <div class="breadcrumb1">
-            <a href="../index.php">Home</a> > 
-            <a>Brands</a>
+    <div class="breadcrumb">
+        <a href="../index.php"><span class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px;">home</span>Home</a> > <span class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px; color: #0062F6;">store</span><a>Brands</a>
     </div>
 
-    <div class="processor-section1">
-    <h2>BRANDS</h2>
-    </div>
-    <div class="processor1-section">
+    <div class="brands-intro">
+    <h1>OUR PREMIUM BRANDS</h1>
 
     <p>As an online tech store, we pride ourselves on providing our customers with the best and most reliable components from top brands in the industry. We house a wide range of trusted brands including Intel, AMD, NVIDIA, ASUS, Gigabyte, RAKK, Corsair, Kingston, MSI, ACER  and many more. Each brand has been carefully selected by our team to ensure that we offer only the highest quality components.</p>
     <br>

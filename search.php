@@ -1,16 +1,31 @@
 <?php
+// Start session to check if the user is logged in
 session_start();
 
 // Initialize cart from database
 require_once 'init_cart.php';
 
+// Function to calculate total cart quantity
+function getCartTotalQuantity() {
+    if (!isset($_SESSION['cart'])) {
+        return 0;
+    }
+    $total = 0;
+    foreach ($_SESSION['cart'] as $item) {
+        $total += isset($item['quantity']) ? $item['quantity'] : 1;
+    }
+    return $total;
+}
+
 // Database connection
 $conn = new mysqli("localhost", "root", "", "smartsolutions");
 
 // Check if logged in
-$profile_picture = "image/login-icon.png";
+$profile_picture = "/ITP122/image/login-icon.png"; 
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
+    
+    // Query to get user's profile picture
     $query = "SELECT profile_picture FROM users WHERE id = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $user_id);
@@ -19,10 +34,27 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            $profile_picture = $row['profile_picture'];
+            $profile_picture = "/ITP122/" . $row['profile_picture']; 
         }
     }
     $stmt->close();
+}
+$conn->close();
+
+// Handle add to cart
+if (isset($_GET['action']) && $_GET['action'] == 'add') {
+    $product_id = $_GET['product_id'];
+    $product_name = $_GET['product_name'];
+    $product_price = $_GET['product_price'];
+
+    // Add product to session cart
+    $cart = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
+    $cart[] = [
+        'id' => $product_id,
+        'name' => $product_name,
+        'price' => $product_price
+    ];
+    $_SESSION['cart'] = $cart;
 }
 
 // Get search query
@@ -31,10 +63,10 @@ $searchResults = [];
 
 // Define all products (from cart.php products array)
 $allProducts = [
-    ["id" => 1, "name" => "Core i7 12700 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 25195.00, "image" => "image/desktop1.png", "category" => "Desktop"],
-    ["id" => 2, "name" => "Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 14795.00, "image" => "image/desktop2.png", "category" => "Desktop"],
-    ["id" => 3, "name" => "MSI Thin A15 B7UCX-084PH 15.6 / FHD 144Hz AMD RYZEN 5 7535HS/8GB/512GBSSD/RTX 2050 4GB/WIN11 Laptop", "price" => 38995.00, "image" => "image/laptop1.png", "category" => "Laptop"],
-    ["id" => 4, "name" => "Lenovo V15 G4 IRU 15.6 / FHD Intel Core i5- 1335U/8GB DDR4/512GB M.2 SSD Laptop MN", "price" => 29495.00, "image" => "image/laptop2.png", "category" => "Laptop"],
+    ["id" => 1, "name" => "Core i7 12700 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 25195.00, "image" => "image/Core_i7.png", "category" => "Desktop"],
+    ["id" => 2, "name" => "Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 14795.00, "image" => "image/Core_i3.png", "category" => "Desktop"],
+    ["id" => 3, "name" => "MSI Thin A15 B7UCX-084PH 15.6 / FHD 144Hz AMD RYZEN 5 7535HS/8GB/512GBSSD/RTX 2050 4GB/WIN11 Laptop", "price" => 38995.00, "image" => "image/msithin.png", "category" => "Laptop"],
+    ["id" => 4, "name" => "Lenovo V15 G4 IRU 15.6 / FHD Intel Core i5- 1335U/8GB DDR4/512GB M.2 SSD Laptop MN", "price" => 29495.00, "image" => "image/idealpad.png", "category" => "Laptop"],
     ["id" => 5, "name" => "Team Elite Vulcan TUF 16gb 2x8 3200mhz Ddr4 Gaming Memory", "price" => 1999.00, "image" => "image/deal1.png", "category" => "Memory"],
     ["id" => 6, "name" => "Team Elite Plus 8gb 1x8 3200Mhz Black Gold Ddr4 Memory", "price" => 1045.00, "image" => "image/deal2.png", "category" => "Memory"],
     ["id" => 7, "name" => "G.Skill Ripjaws V 16gb 2x8 3200mhz Ddr4 Memory Black", "price" => 2185.00, "image" => "image/deal3.png", "category" => "Memory"],
@@ -83,45 +115,44 @@ if (!empty($searchQuery)) {
         }
     }
 }
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="shortcut icon" href="image/smartsolutionslogo.jpg" type="image/x-icon">
-<link rel="stylesheet" href="design.css" />
-<link rel="stylesheet" href="animations.css" />
+<link rel="shortcut icon" href="/ITP122/image/smartsolutionslogo.jpg" type="/ITP122/image/x-icon">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+<link rel="stylesheet" href="/ITP122/css/design.css?v=<?php echo time(); ?>" />
+<link rel="stylesheet" href="/ITP122/css/animations.css" />
 <meta charset="UTF-8">
-<title>Search Results - SMARTSOLUTIONS</title>
+    <title>LAPTOP - SMARTSOLUTIONS</title>
 </head>
 <body>
-
 <header>
     <div class="ssheader">
         <div class="logo">
-            <img src="image/logo.png" alt="Smart Solutions Logo">
+            <img src="/ITP122/image/logo.png" alt="Smart Solutions Logo">
         </div>
         <div class="search-bar">
-            <input type="text" placeholder="Search" value="<?php echo htmlspecialchars($searchQuery); ?>">
-            <div class="search-icon">
-                <img src="image/search-icon.png" alt="Search Icon">
-            </div>
+            <input type="text" placeholder="Search">
+        <div class="search-icon">
+            <img src="/ITP122/image/search-icon.png" alt="Search Icon">
         </div>
-        <a href="location.php">
+        </div>
+        <a href="/ITP122/pages/location.php">
             <div class="location">
-                <img class="location" src="image/location-icon.png" alt="location-icon">
+                <img class="location" src="/ITP122/image/location-icon.png" alt="location-icon">
             </div>
         </a>
         <div class="track">
-            <a href="track.php"><img class="track" src="image/track-icon.png" alt="track-icon"></a>
+            <a href="/ITP122/pages/track.php"><img class="track" src="/ITP122/image/track-icon.png" alt="track-icon"></a>
         </div>
-        <a href="cart.php">
+        <a href="../cart.php">
             <div class="cart">
-                <img class="cart" src="image/cart-icon.png" alt="cart-icon" style="width: 35px; height: auto;">
+                <img class="cart" src="/ITP122/image/cart-icon.png" alt="cart-icon" style="width: 35px; height: auto;">
                 <span class="cart-counter">
-                    <?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?>
+                    <?php echo getCartTotalQuantity(); ?>
                 </span>
             </div>
         </a>
@@ -150,37 +181,39 @@ $conn->close();
             }
         </style>
 
-       <div class="login profile-dropdown" style="position: relative; display: inline-block;">
+        <div class="login profile-dropdown">
             <a href="javascript:void(0)" onclick="toggleDropdown()">
                 <img class="login" 
-                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : 'image/login-icon.png'; ?>" 
-                     alt="login-icon" 
-                     style="border-radius: <?php echo isset($_SESSION['user_id']) ? '50%' : '0'; ?>; 
+                    src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : 'image/login-icon.png'; ?>" 
+                    alt="login-icon" 
+                    style="border-radius: <?php echo isset($_SESSION['user_id']) ? '50%' : '0'; ?>; 
                             width: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>; 
                             height: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>;">
             </a>
-            <div id="dropdown-menu" class="dropdown-content" style="display: none; position: absolute; background-color: #f9f9f9; min-width: 160px; box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); z-index: 1; border-radius: 5px;">
+            <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="logout.php" style="color: black; padding: 12px 16px; text-decoration: none; display: block;">Log Out</a>
+                    <a href="user/profile.php">View Profile</a>
+                    <a href="user/edit-profile.php">Edit Profile</a>
+                    <a href="user/logout.php">Log Out</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="login-text">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="user/profile.php"></a>
+                <?php else: ?>
+                    <a href="user/register.php"><p>Login/<br>Sign In</p></a>
                 <?php endif; ?>
-            </div>  
-        </div>
-        <div class="login-text">
-            <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="profile.php"></a>
-            <?php else: ?>
-                <a href="register.php"><p>Login/<br>Sign In</p></a>
-            <?php endif; ?>
-        </div>
+            </div>
     </div>
 </header>
 
 <div class="menu">
     <a href="index.php">HOME</a>
-    <a href="product.php">PRODUCTS</a>
+    <a href="pages/product.php">PRODUCTS</a>
     <a href="products/desktop.php">DESKTOP</a>
     <a href="products/laptop.php">LAPTOP</a>
-    <a href="brands.php">BRANDS</a>
+    <a href="pages/brands.php">BRANDS</a>
 </div>
 
 <div class="breadcrumb">
@@ -200,20 +233,20 @@ $conn->close();
     </p>
 
     <?php if (!empty($searchResults)): ?>
-        <div class="product-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+        <div class="product-grid">
             <?php foreach ($searchResults as $product): ?>
-                <div class='product-card' style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; text-align: center; transition: all 0.3s ease;">
-                    <img src='<?php echo $product['image']; ?>' alt='<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>' style="width: 100%; height: 200px; object-fit: cover; border-radius: 5px; margin-bottom: 10px;">
-                    <h4 style="margin: 10px 0; font-size: 14px; min-height: 40px;"><?php echo $product['name']; ?></h4>
-                    <p style="color: #007BFF; font-size: 16px; font-weight: bold; margin: 10px 0;">₱<?php echo number_format($product['price'], 2); ?></p>
-                    <p style="color: #666; font-size: 12px; margin: 10px 0;"><?php echo $product['category']; ?></p>
-                    <div class='button-group' style="display: flex; gap: 10px; margin-top: 15px;">
-                        <a href='<?php echo (isset($_SESSION['user_id']) ? "checkout.php" : "register.php"); ?>' style="flex: 1;">
-                            <button class='buy-now' style="width: 100%; padding: 8px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">BUY NOW</button>
+                <div class='product-card'>
+                    <img src='<?php echo $product['image']; ?>' alt='<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>'>
+                    <h4><?php echo $product['name']; ?></h4>
+                    <p><?php echo "₱" . number_format($product['price'], 2); ?></p>
+                    <p><?php echo $product['category']; ?></p>
+                    <div class='button-group'>
+                        <a href="#" class="buy-now-btn" data-id="<?php echo $product['id']; ?>" data-name="<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>" data-price="<?php echo $product['price']; ?>" data-image="<?php echo $product['image']; ?>">
+                            <button class='buy-now'>BUY NOW</button>
                         </a>
-                        <a href="#" class="ajax-add" data-id="<?php echo $product['id']; ?>" data-name="<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>" data-price="<?php echo $product['price']; ?>" data-image="<?php echo $product['image']; ?>" style="flex: 1;">
-                            <button class='add-to-cart' style="width: 100%; padding: 8px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                🛒 ADD TO CART
+                        <a href="#" class="ajax-add" data-id="<?php echo $product['id']; ?>" data-name="<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>" data-price="<?php echo $product['price']; ?>" data-image="<?php echo $product['image']; ?>">
+                            <button class='add-to-cart'>
+                                <img src='image/add-to-cart.png' alt='Add to Cart'>
                             </button>
                         </a>
                     </div>
@@ -284,19 +317,81 @@ $conn->close();
 </div>
 
 <script>
+    // Add JavaScript to toggle dropdown visibility
     function toggleDropdown() {
         var dropdownMenu = document.getElementById("dropdown-menu");
+        // Toggle the visibility of the dropdown menu
         dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
     }
 
+    // Close the dropdown if the user clicks anywhere outside of it
     window.onclick = function(event) {
         var dropdownMenu = document.getElementById("dropdown-menu");
         if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-            dropdownMenu.style.display = 'none';
+            dropdownMenu.style.display = 'none'; 
         }
     };
+    
+    // Handle buy now button
+    document.addEventListener('click', function(e) {
+        let target = e.target.closest('a.buy-now-btn');
+        if (!target) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const productId = target.getAttribute('data-id');
+        const productName = target.getAttribute('data-name');
+        const productPrice = target.getAttribute('data-price');
+        const productImage = target.getAttribute('data-image');
+        
+        if (!productId) {
+            console.log('Missing product ID');
+            return;
+        }
+        
+        console.log('Buy now clicked:', {productId, productName, productPrice, productImage});
+        
+        // Send product to session via fetch
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('product_name', productName);
+        formData.append('product_price', productPrice);
+        formData.append('product_image', productImage);
+        formData.append('quantity', 1);
+        formData.append('buy_now', '1');
+        
+        fetch('/ITP122/set_buynow_product.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => {
+            console.log('Response status:', res.status);
+            return res.text();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            try {
+                const jsonData = JSON.parse(data);
+                if (jsonData.success) {
+                    window.location.href = '/ITP122/pages/checkout.php';
+                } else {
+                    alert('Error: ' + (jsonData.message || 'Failed to process'));
+                }
+            } catch(e) {
+                console.error('JSON parse error:', e);
+                alert('Error processing request');
+            }
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            alert('Error: ' + err.message);
+        });
+    });
 </script>
-<script src="search-dynamic.js"></script>
-<script src="ajax-cart.js"></script>
+<script src="js/search.js"></script>
+<script src="js/jquery-animations.js"></script>
+<script src="js/ajax-cart-clean.js"></script>
 </body>
 </html>
+

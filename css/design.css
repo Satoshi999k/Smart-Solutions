@@ -72,29 +72,31 @@
             min-width: 200px;
             max-width: 700px;
             margin: 0 20px;
+            display: flex;
+            align-items: center;
+            height: 100px;
+            overflow: visible;
         }
 
         .search-bar input {
-            padding: 10px 40px 10px 20px;
+            padding: 10px 120px 10px 20px;
             border-radius: 25px;
             border: none;
             width: 100%;
             outline: none;
+            height: 50px;
         }
 
         .search-bar .search-icon {
-            position: absolute;
-            top: 50%;
-            right: 15px;
-            transform: translateY(-50%);
-            z-index: 1;
-            background-image: url('/ITP122/image/search-icon.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            width: 10px;
-            height: 20px;
+            position: relative;
+            z-index: 10;
             cursor: pointer;
+            margin-left: 10px;
+            display: block;
+        }
+        
+        .search-bar .search-icon:hover {
+            transform: scale(1.1);
         }
 
         .location {
@@ -261,11 +263,10 @@
             .search-bar input {
                 width: 100%;
             }
-            .search-bar {
-                right: 10px;
-            }
             .search-icon {
-                display: none;
+                width: 80px !important;
+                height: 80px !important;
+                display: block !important;
             }
             .location, .track, .feedback, .liked {
                 display: none;
@@ -334,6 +335,8 @@
 
             .search-bar .search-icon {
                 right: 15px; /* Adjust icon position */
+                width: 80px !important;
+                height: 80px !important;
             }
 
             .location img, 
@@ -1511,11 +1514,18 @@
             text-align: center;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 450px;
         }
 
         .product-card img {
             width: 80%;
-            margin-bottom: 10px;
+            height: 200px;
+            object-fit: contain;
+            margin: 0 auto 10px;
+            display: block;
         }
 
         .product-card h4 {
@@ -1526,6 +1536,7 @@
             min-height: 60px;
             display: flex;
             align-items: flex-start;
+            flex-grow: 1;
         }
 
         .product-card p {
@@ -1533,14 +1544,21 @@
             font-weight: bold;
             color: #000;
             margin-left: 5px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-align: left;
+        }
+
+        .product-card .button-group {
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
         }
 
         .button-group {
             display: flex;
             gap: 5px;
             justify-content: center;
+            align-items: center;
         }
 
         .button-group a {
@@ -1548,17 +1566,16 @@
         }
 
         .buy-now, .add-to-cart {
-            padding: 10px;
+            padding: 0;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9em;
-            height: 40px;
-            margin-left: 5px;
-            margin-right: 10px; 
+            font-size: 12px;
+            height: 32px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .buy-now {
@@ -1566,31 +1583,28 @@
             color: #fff;
             width: 220px; 
             text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .buy-now:hover {
             background-color: #0062F6;
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
 
         .add-to-cart {
             background-color: gray;
-            width: 40px; 
-            margin-top: -1px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 32px;
         }
 
         .add-to-cart:hover {
             background-color: #0062F6;
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
 
         .add-to-cart img {
-            width: 20px;
-            height: 20px;
-            margin-top: 14px;
-            margin-left: 5px;
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            padding: 0;
         }
 
         .add-to-cart img:hover {

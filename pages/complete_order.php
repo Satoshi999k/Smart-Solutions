@@ -5,6 +5,6 @@ session_start();
 unset($_SESSION['cart']);
 
 // Redirect to thankyou.html
-header("Location: thankyou.html");
+header("Location: thankyou.php");
 exit; //Important: Stop further execution after header redirect
 ?>

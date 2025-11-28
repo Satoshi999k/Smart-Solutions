@@ -53,6 +53,7 @@ $top_products = array_slice($product_sales, 0, 10, true);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - Admin</title>
     <link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         * {
@@ -125,6 +126,22 @@ $top_products = array_slice($product_sales, 0, 10, true);
             margin-right: 10px;
             width: 20px;
             display: inline-block;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
         }
         
         .main-content {
@@ -240,12 +257,12 @@ $top_products = array_slice($product_sales, 0, 10, true);
             </div>
             
             <div class="sidebar-menu">
-                <a href="/ITP122/admin/admin_dashboard.php"><i>📊</i> Dashboard</a>
-                <a href="/ITP122/admin/admin_orders.php"><i>🛒</i> Orders</a>
-                <a href="/ITP122/admin/admin_users.php"><i>👥</i> Users</a>
-                <a href="/ITP122/admin/admin_products.php"><i>📦</i> Products</a>
-                <a href="/ITP122/admin/admin_reports.php" class="active"><i>📈</i> Reports</a>
-                <a href="/ITP122/admin/admin_settings.php"><i>⚙️</i> Settings</a>
+                <a href="/ITP122/admin/admin_dashboard.php"><i class="material-icons">dashboard</i> Dashboard</a>
+                <a href="/ITP122/admin/admin_orders.php"><i class="material-icons">shopping_cart</i> Orders</a>
+                <a href="/ITP122/admin/admin_users.php"><i class="material-icons">people</i> Users</a>
+                <a href="/ITP122/admin/admin_products.php"><i class="material-icons">inventory_2</i> Products</a>
+                <a href="/ITP122/admin/admin_reports.php" class="active"><i class="material-icons">trending_up</i> Reports</a>
+                <a href="/ITP122/admin/admin_settings.php"><i class="material-icons">settings</i> Settings</a>
             </div>
         </div>
         
@@ -257,7 +274,7 @@ $top_products = array_slice($product_sales, 0, 10, true);
             
             <div class="reports-grid">
                 <div class="report-card">
-                    <h3>📊 Monthly Revenue</h3>
+                    <h3><i class="material-icons" style="vertical-align: middle; margin-right: 5px;">show_chart</i> Monthly Revenue</h3>
                     <?php if ($monthly_revenue && $monthly_revenue->num_rows > 0): ?>
                     <table>
                         <thead>
@@ -281,7 +298,7 @@ $top_products = array_slice($product_sales, 0, 10, true);
                 </div>
                 
                 <div class="report-card">
-                    <h3>🏆 Top Selling Products</h3>
+                    <h3><i class="material-icons" style="vertical-align: middle; margin-right: 5px;">star</i> Top Selling Products</h3>
                     <?php if (count($top_products) > 0): ?>
                     <table>
                         <thead>
@@ -312,12 +329,12 @@ $top_products = array_slice($product_sales, 0, 10, true);
             </div>
             
             <div class="report-card">
-                <h3>📈 Monthly Revenue Chart</h3>
+                <h3><i class="material-icons" style="vertical-align: middle; margin-right: 5px;">trending_up</i> Monthly Revenue Chart</h3>
                 <canvas id="revenueChart" style="max-height: 400px; margin-top: 20px;"></canvas>
             </div>
             
             <div class="report-card">
-                <h3>🎯 Top Products Chart</h3>
+                <h3><i class="material-icons" style="vertical-align: middle; margin-right: 5px;">analytics</i> Top Products Chart</h3>
                 <canvas id="productsChart" style="max-height: 400px; margin-top: 20px;"></canvas>
             </div>
         </div>

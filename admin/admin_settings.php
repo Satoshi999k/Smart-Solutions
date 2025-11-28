@@ -17,6 +17,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Admin</title>
     <link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -88,6 +89,22 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
             margin-right: 10px;
             width: 20px;
             display: inline-block;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
         }
         
         .main-content {
@@ -142,6 +159,11 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+        
+        .settings-card h3 .material-icons {
+            color: #2196f3;
+            font-size: 24px;
         }
         
         .settings-item {
@@ -210,12 +232,12 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
             </div>
             
             <div class="sidebar-menu">
-                <a href="/ITP122/admin/admin_dashboard.php"><i>📊</i> Dashboard</a>
-                <a href="/ITP122/admin/admin_orders.php"><i>🛒</i> Orders</a>
-                <a href="/ITP122/admin/admin_users.php"><i>👥</i> Users</a>
-                <a href="/ITP122/admin/admin_products.php"><i>📦</i> Products</a>
-                <a href="/ITP122/admin/admin_reports.php"><i>📈</i> Reports</a>
-                <a href="/ITP122/admin/admin_settings.php" class="active"><i>⚙️</i> Settings</a>
+                <a href="/ITP122/admin/admin_dashboard.php"><i class="material-icons">dashboard</i> Dashboard</a>
+                <a href="/ITP122/admin/admin_orders.php"><i class="material-icons">shopping_cart</i> Orders</a>
+                <a href="/ITP122/admin/admin_users.php"><i class="material-icons">people</i> Users</a>
+                <a href="/ITP122/admin/admin_products.php"><i class="material-icons">inventory_2</i> Products</a>
+                <a href="/ITP122/admin/admin_reports.php"><i class="material-icons">trending_up</i> Reports</a>
+                <a href="/ITP122/admin/admin_settings.php" class="active"><i class="material-icons">settings</i> Settings</a>
             </div>
         </div>
         
@@ -227,7 +249,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
             
             <div class="settings-grid">
                 <div class="settings-card">
-                    <h3>🔐 Account Settings</h3>
+                    <h3><i class="material-icons">lock</i> Account Settings</h3>
                     <div class="settings-item">
                         <span class="settings-label">Admin Username</span>
                         <span class="settings-value"><?php echo htmlspecialchars($_SESSION['first_name']); ?></span>
@@ -239,7 +261,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
                 </div>
                 
                 <div class="settings-card">
-                    <h3>🏪 Store Settings</h3>
+                    <h3><i class="material-icons">store</i> Store Settings</h3>
                     <div class="settings-item">
                         <span class="settings-label">Store Name</span>
                         <span class="settings-value">Smart Solutions</span>
@@ -255,7 +277,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
                 </div>
                 
                 <div class="settings-card">
-                    <h3>📧 Notifications</h3>
+                    <h3><i class="material-icons">notifications_active</i> Notifications</h3>
                     <div class="settings-item">
                         <span class="settings-label">Email Notifications</span>
                         <button class="btn btn-primary">Configure</button>
@@ -267,7 +289,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
                 </div>
                 
                 <div class="settings-card">
-                    <h3>🛠️ System</h3>
+                    <h3><i class="material-icons">build</i> System</h3>
                     <div class="settings-item">
                         <span class="settings-label">Clear Cache</span>
                         <button class="btn btn-primary" onclick="clearCache()">Clear Now</button>
@@ -283,7 +305,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
                 </div>
                 
                 <div class="settings-card">
-                    <h3>⚠️ Danger Zone</h3>
+                    <h3><i class="material-icons">warning</i> Danger Zone</h3>
                     <div class="settings-item">
                         <span class="settings-label">Reset All Settings</span>
                         <button class="btn btn-danger" onclick="resetSettings()">Reset</button>
@@ -315,7 +337,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
         }
         
         function resetSettings() {
-            if (confirm('⚠️ WARNING: This will reset all settings to default. Continue?')) {
+            if (confirm('WARNING: This will reset all settings to default. Continue?')) {
                 alert('Reset functionality coming soon!');
             }
         }

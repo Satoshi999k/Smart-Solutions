@@ -31,6 +31,29 @@
    background-color: var(--blue);
 }
 
+/* Wave animation keyframes for header */
+@keyframes waveHeader {
+   0% {
+      transform: translateY(0px);
+   }
+   25% {
+      transform: translateY(-8px);
+   }
+   50% {
+      transform: translateY(0px);
+   }
+   75% {
+      transform: translateY(-5px);
+   }
+   100% {
+      transform: translateY(0px);
+   }
+}
+
+header {
+   animation: waveHeader 3s ease-in-out infinite;
+}
+
 .btn,
 .delete-btn{
    width: 100%;

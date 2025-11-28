@@ -5,8 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="css/design.css" />
 <link rel="stylesheet" href="css/animations.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <meta charset="UTF-8">
 <title>SMART SOLUTIONS COMPUTER SHOP</title>
+<?php
+// Display alert if one is set
+if (isset($_SESSION['alert'])) {
+    $alert = $_SESSION['alert'];
+    echo "<script>
+        window.addEventListener('load', function() {
+            Swal.fire({
+                title: '" . addslashes($alert['title']) . "',
+                text: '" . addslashes($alert['message']) . "',
+                icon: '" . $alert['type'] . "',
+                confirmButtonColor: '#0062F6',
+                confirmButtonText: 'OK'
+            });
+        });
+    </script>";
+    unset($_SESSION['alert']);
+}
+?>
 <style>
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
@@ -159,6 +179,27 @@
         font-size: 20px;
     }
 }
+
+/* Menu animation from top */
+@keyframes slideDownMenu {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#main-menu {
+    animation: slideDownMenu 0.6s ease-out 0.3s forwards;
+    opacity: 0;
+}
+
+#main-menu a {
+    transition: all 0.3s ease;
+}
 </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -201,9 +242,7 @@ $conn->close();
         </div>
         <div class="search-bar">
             <input type="text" placeholder="Search">
-            <div class="search-icon">
-                <img src="image/search-icon.png" alt="Search Icon">
-            </div>
+            <img class="search-icon" src="image/search-icon.png" alt="Search" style="width: 20px; height: 20px; cursor: pointer;">
         </div>
         <a href="pages/location.php">
             <div class="location">
@@ -274,7 +313,7 @@ $conn->close();
     </div>
     </header>
 
-    <div class="menu">
+    <div class="menu" id="main-menu">
             <a href="index.php" style="font-weight: bold;">HOME</a>
             <a href="pages/product.php">PRODUCTS</a>
             <a href="products/desktop.php">DESKTOP</a>
@@ -568,9 +607,7 @@ $conn->close();
           <h4>Intel Core i7-12700 / H610 / 8GB DDR4 /...</h4>
           <p>₱25,195.00</p>
         </div>
-       <a href="<?php echo isset($_SESSION['user_id']) ? 'checkout.html' : 'register.php'; ?>">
-    <button class="quick-view">BUY NOW</button>
-</a>
+       <button class="quick-view" onclick="buyNow(1, 'Intel Core i7-12700 / H610 / 8GB DDR4', '25195.00', 'image/desktop1.png')">BUY NOW</button>
 
       </div>
       <div class="item">
@@ -579,9 +616,7 @@ $conn->close();
           <h4>Intel Core i3-12100 / H610 / 8GB DDR4 /...</h4>
           <p>₱14,795.00</p>
         </div>
-        <a href="<?php echo isset($_SESSION['user_id']) ? 'checkout.html' : 'register.php'; ?>">
-    <button class="quick-view">BUY NOW</button>
-    </a>
+        <button class="quick-view" onclick="buyNow(2, 'Intel Core i3-12100 / H610 / 8GB DDR4', '14795.00', 'image/desktop2.png')">BUY NOW</button>
 
       </div>
     </div>
@@ -600,9 +635,7 @@ $conn->close();
           <h4>MSI Thin A15 B7UCX-084PH 15.6" F...</h4>
           <p>₱38,995.00</p>
         </div>
-        <a href="<?php echo isset($_SESSION['user_id']) ? 'checkout.html' : 'register.php'; ?>">
-    <button class="quick-view">BUY NOW</button>
-</a>
+        <button class="quick-view" onclick="buyNow(3, 'MSI Thin A15 B7UCX-084PH 15.6', '38995.00', 'image/msithin.png')">BUY NOW</button>
 
       </div>
       <div class="item">
@@ -611,9 +644,7 @@ $conn->close();
           <h4>Lenovo V15 G4 IRU 15.6" FHD Intel...</h4>
           <p>₱27,995.00</p>
         </div>
-       <a href="<?php echo isset($_SESSION['user_id']) ? 'checkout.html' : 'register.php'; ?>">
-    <button class="quick-view">BUY NOW</button>
-</a>
+       <button class="quick-view" onclick="buyNow(4, 'Lenovo V15 G4 IRU 15.6 FHD Intel', '27995.00', 'image/ideapad.png')">BUY NOW</button>
 
       </div>
     </div>
@@ -636,9 +667,7 @@ $conn->close();
             <h4>Team Elite Vulcan TUF 16G...</h4>
             <p class="price">₱1,999.00</p>
             <div class="original-price1">₱3,652.00</div>
-            <a href="<?php echo isset($_SESSION['user_id']) ? 'checkout.html' : 'register.php'; ?>">
-    <button class="buy-now-deals">BUY NOW</button>
-</a>
+            <button class="buy-now-deals" onclick="buyNow(5, 'Team Elite Vulcan TUF 16G', '1999.00', 'image/deal1.png')">BUY NOW</button>
 
         </div>
         <div class="deal-item animated scaleIn" style="animation-delay: 0.1s">
@@ -650,9 +679,7 @@ $conn->close();
             <h4>Team Elite Plus 8GB 1x8 32...</h4>
             <p class="price">₱1,045.00</p>
             <div class="original-price1">₱1,719.00</div>
-            <a href="<?php echo isset($_SESSION['user_id']) ? 'checkout.html' : 'register.php'; ?>">
-    <button class="buy-now-deals">BUY NOW</button>
-</a>
+            <button class="buy-now-deals" onclick="buyNow(6, 'Team Elite Plus 8GB 1x8 32', '1045.00', 'image/deal2.png')">BUY NOW</button>
 
         </div>
         <div class="deal-item animated scaleIn" style="animation-delay: 0.2s">
@@ -664,9 +691,7 @@ $conn->close();
             <h4>G.Skill Ripjaws V 16gb 2x8...</h4>
             <p class="price">₱2,185.00</p>
             <div class="original-price1">₱3,844.00</div>
-            <a href="<?php echo isset($_SESSION['user_id']) ? 'checkout.html' : 'register.php'; ?>">
-    <button class="buy-now-deals">BUY NOW</button>
-</a>
+            <button class="buy-now-deals" onclick="buyNow(7, 'G.Skill Ripjaws V 16gb 2x8', '2185.00', 'image/deal3.png')">BUY NOW</button>
 
         </div>
         <div class="deal-item animated scaleIn" style="animation-delay: 0.3s">
@@ -678,9 +703,7 @@ $conn->close();
             <h4>Team Elite 8gb 1x8 1600m...</h4>
             <p class="price">₱1,065.00</p>
             <div class="original-price1">₱1,687.00</div>
-            <a href="<?php echo isset($_SESSION['user_id']) ? 'checkout.html' : 'register.php'; ?>">
-    <button class="buy-now-deals">BUY NOW</button>
-</a>
+            <button class="buy-now-deals" onclick="buyNow(8, 'Team Elite 8gb 1x8 1600m', '1065.00', 'image/deal4.png')">BUY NOW</button>
 
         </div>
         <div class="deal-item animated scaleIn" style="animation-delay: 0.4s">
@@ -692,9 +715,7 @@ $conn->close();
             <h4>AMD Ryzen 5 Pro 4650G S...</h4>
             <p class="price">₱5,845.00</p>
             <div class="original-price1">₱8,595.00</div>
-            <a href="<?php echo isset($_SESSION['user_id']) ? 'checkout.html' : 'register.php'; ?>">
-    <button class="buy-now-deals">BUY NOW</button>
-</a>
+            <button class="buy-now-deals" onclick="buyNow(9, 'AMD Ryzen 5 Pro 4650G S', '5845.00', 'image/deal5.png')">BUY NOW</button>
 
         </div>
         <div class="deal-item animated scaleIn" style="animation-delay: 0.5s">
@@ -706,10 +727,114 @@ $conn->close();
             <h4>Team Elite TForce Delta 2x...</h4>
             <p class="price">₱3,155.00</p>
             <div class="original-price1">₱4,549.00</div>
-            <a href="<?php echo isset($_SESSION['user_id']) ? 'checkout.html' : 'register.php'; ?>">
-    <button class="buy-now-deals">BUY NOW</button>
-</a>
+            <button class="buy-now-deals" onclick="buyNow(10, 'Team Elite TForce Delta 2x', '3155.00', 'image/deal6.png')">BUY NOW</button>
 
+                </div>
+            </div>
+        </div>
+
+        <!-- Why Choose Us Section -->
+        <style>
+            @keyframes waveGradient {
+                0% {
+                    background: linear-gradient(45deg, #007BFF 0%, #0056b3 25%, #003f87 50%, #0056b3 75%, #007BFF 100%);
+                    background-size: 400% 400%;
+                    background-position: 0% 50%;
+                }
+                25% {
+                    background-position: 50% 50%;
+                }
+                50% {
+                    background-position: 100% 50%;
+                }
+                75% {
+                    background-position: 50% 50%;
+                }
+                100% {
+                    background-position: 0% 50%;
+                }
+            }
+            
+            .why-choose-us-animated {
+                background: linear-gradient(45deg, #007BFF 0%, #0056b3 25%, #003f87 50%, #0056b3 75%, #007BFF 100%);
+                background-size: 400% 400%;
+                animation: waveGradient 8s ease-in-out infinite;
+            }
+        </style>
+        <div class="why-choose-us-section why-choose-us-animated" style="padding: 50px 20px; text-align: center; margin: 40px 0; position: relative; overflow: hidden;">
+            <h2 style="font-size: 2.2em; color: white; margin-bottom: 10px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);">Why Choose Us</h2>
+            <p class="section-subtitle" style="font-size: 1em; color: rgba(255, 255, 255, 0.95); margin-bottom: 40px;">Experience the difference with our premium service</p>
+            <div class="features-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; max-width: 1100px; margin: 0 auto; position: relative; z-index: 2;">
+                <div class="feature-card" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); padding: 28px 20px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;">
+                    <div class="feature-icon" style="font-size: 2em; margin-bottom: 12px; display: block; animation: float 5s ease-in-out infinite; color: white;"><i class="material-icons" style="font-size: 2em;">local_shipping</i></div>
+                    <h3 style="font-size: 1.1em; margin-bottom: 10px; font-weight: bold; color: white;">Lightning Fast Delivery</h3>
+                    <p style="font-size: 0.85em; line-height: 1.5; color: rgba(255, 255, 255, 0.9);">Get your orders delivered within 48 hours with our express shipping service.</p>
+                </div>
+                <div class="feature-card" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); padding: 28px 20px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;">
+                    <div class="feature-icon" style="font-size: 2em; margin-bottom: 12px; display: block; animation: float 5s ease-in-out infinite 0.7s; color: white;"><i class="material-icons" style="font-size: 2em;">verified_user</i></div>
+                    <h3 style="font-size: 1.1em; margin-bottom: 10px; font-weight: bold; color: white;">Secure Payments</h3>
+                    <p style="font-size: 0.85em; line-height: 1.5; color: rgba(255, 255, 255, 0.9);">Shop with confidence using our encrypted and protected payment gateway.</p>
+                </div>
+                <div class="feature-card" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); padding: 28px 20px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;">
+                    <div class="feature-icon" style="font-size: 2em; margin-bottom: 12px; display: block; animation: float 5s ease-in-out infinite 1.4s; color: white;"><i class="material-icons" style="font-size: 2em;">assignment_return</i></div>
+                    <h3 style="font-size: 1.1em; margin-bottom: 10px; font-weight: bold; color: white;">Easy Returns</h3>
+                    <p style="font-size: 0.85em; line-height: 1.5; color: rgba(255, 255, 255, 0.9);">Not satisfied? Return within 30 days for a full refund, no questions asked.</p>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-15px); }
+            }
+            
+            .feature-card:hover {
+                transform: translateY(-15px) !important;
+                box-shadow: 0 25px 50px rgba(0, 123, 255, 0.3) !important;
+            }
+        </style>
+
+        <!-- What Our Customers Say Section -->
+        <div style="padding: 50px 20px; text-align: left; margin: 40px 0; background: transparent;">
+            <h2 style="font-size: 2.2em; color: #333; margin-bottom: 10px; font-weight: bold; text-align: center;">What Our Customers Say</h2>
+            <p style="font-size: 1em; color: #666; margin-bottom: 40px; text-align: center;">Real stories from shoppers who found their perfect tech with SmartSolutions</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; max-width: 1100px; margin: 0 auto;">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card" style="background: white; padding: 12px 10px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: left; display: flex; flex-direction: column; min-height: auto; position: relative;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px;">
+                        <div style="color: #FFB800; font-size: 1.1em; letter-spacing: 2px;">★★★★★</div>
+                        <div style="color: #333; font-weight: bold; font-size: 0.95em;">5.0</div>
+                    </div>
+                    <p style="font-size: 0.95em; line-height: 1.7; color: #555; margin-bottom: 12px; flex-grow: 1;">The laptop I ordered arrived perfectly packaged and within 2 days. The quality exceeded my expectations and the customer service was incredibly helpful. Definitely my go-to store now!</p>
+                    <div style="border-top: 1px solid #eee; padding-top: 8px; margin-top: auto;">
+                        <p style="font-weight: 600; color: #333; margin: 0; font-size: 0.95em;">Jhon Rey Dominise</p>
+                        <p style="font-size: 0.85em; color: #888; margin: 2px 0;">Professional • Davao City</p>
+                    </div>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card" style="background: white; padding: 12px 10px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: left; display: flex; flex-direction: column; min-height: auto; position: relative;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px;">
+                        <div style="color: #FFB800; font-size: 1.1em; letter-spacing: 2px;">★★★★★</div>
+                        <div style="color: #333; font-weight: bold; font-size: 0.95em;">5.0</div>
+                    </div>
+                    <p style="font-size: 0.95em; line-height: 1.7; color: #555; margin-bottom: 12px; flex-grow: 1;">I've been a customer for over a year now. SmartSolutions has the best prices and their technical support team always goes the extra mile. Highly recommended!</p>
+                    <div style="border-top: 1px solid #eee; padding-top: 8px; margin-top: auto;">
+                        <p style="font-weight: 600; color: #333; margin: 0; font-size: 0.95em;">Mark Foster</p>
+                        <p style="font-size: 0.85em; color: #888; margin: 2px 0;">Student • Tagum City</p>
+                    </div>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card" style="background: white; padding: 12px 10px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: left; display: flex; flex-direction: column; min-height: auto; position: relative;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px;">
+                        <div style="color: #FFB800; font-size: 1.1em; letter-spacing: 2px;">★★★★★</div>
+                        <div style="color: #333; font-weight: bold; font-size: 0.95em;">4.9</div>
+                    </div>
+                    <p style="font-size: 0.95em; line-height: 1.7; color: #555; margin-bottom: 12px; flex-grow: 1;">Best gaming laptop setup I could get for the price. The build quality is excellent and I love the warranty coverage. Will definitely be back for upgrades!</p>
+                    <div style="border-top: 1px solid #eee; padding-top: 8px; margin-top: auto;">
+                        <p style="font-weight: 600; color: #333; margin: 0; font-size: 0.95em;">Ryan Mangaliwan</p>
+                        <p style="font-size: 0.85em; color: #888; margin: 2px 0;">Content Creator • Mati City</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -719,7 +844,7 @@ $conn->close();
         <h3>Customer Service</h3>
         <ul>
             <li><a href="pages/paymentfaq.php">Payment FAQs</a></li>
-            <li><a href="ret&ref.php">Return and Refunds</a></li>
+            <li><a href="pages/ret&ref.php">Return and Refunds</a></li>
         </ul>
         </div>
         <div class="footer-col">
@@ -868,9 +993,125 @@ $(document).ready(function() {
         $(this).removeClass('buttonClick');
     });
 });
+
+// Buy Now function for featured products and deals
+function buyNow(productId, productName, productPrice, productImage) {
+    // Check if user is logged in
+    const userLoggedIn = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
+    
+    if (!userLoggedIn) {
+        window.location.href = 'user/register.php';
+        return;
+    }
+    
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('product_name', productName);
+    formData.append('product_price', productPrice);
+    formData.append('product_image', productImage);
+    formData.append('quantity', 1);
+    
+    // Send data to set_buynow_product.php
+    fetch('set_buynow_product.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect to checkout
+            window.location.href = 'checkout.php';
+        } else {
+            alert('Error: ' + (data.message || 'Unable to process buy now'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
 </script>
 <script src="../js/header-animation.js"></script>
 <script src="../js/search.js"></script>
-<script src="../js/jquery-animations.js"></script>
+
+<!-- Smooth Page Animations & Transitions -->
+<script>
+$(document).ready(function() {
+    // Fade in entire page
+    $('body').fadeIn(600);
+    
+    // Testimonial cards staggered fade-in
+    $('.testimonial-card').each(function(index) {
+        $(this).hide().delay(index * 200).fadeIn(600);
+    });
+    
+    // Testimonial cards hover effect - lift up and shadow
+    $('.testimonial-card').hover(function() {
+        $(this).stop().animate({
+            marginTop: '-10px',
+            boxShadow: '0 15px 40px rgba(0, 0, 0, 0.3)'
+        }, 300);
+    }, function() {
+        $(this).stop().animate({
+            marginTop: '0px',
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+        }, 300);
+    });
+    
+    // Feature cards fade in
+    $('.feature-card').each(function(index) {
+        $(this).hide().delay(index * 100).fadeIn(500);
+    });
+    
+    // Feature cards hover scale
+    $('.feature-card').hover(function() {
+        $(this).stop().animate({
+            transform: 'scale(1.05)'
+        }, 250);
+    }, function() {
+        $(this).stop().animate({
+            transform: 'scale(1)'
+        }, 250);
+    });
+    
+    // Product cards animation
+    $('.product-card').each(function(index) {
+        $(this).hide().delay(index * 80).fadeIn(500);
+    });
+    
+    // Smooth scroll animation for anchor links
+    $('a[href*="#"]').on('click', function(e) {
+        e.preventDefault();
+        var target = $(this.getAttribute('href'));
+        if(target.length) {
+            $('html, body').stop().animate({
+                scrollTop: target.offset().top - 100
+            }, 1000);
+        }
+    });
+    
+    // Section visibility fade-in on scroll
+    function checkScroll() {
+        $('.why-choose-us-section, .feature-card, .product-card').each(function() {
+            var elementTop = $(this).offset().top;
+            var elementBottom = elementTop + $(this).outerHeight();
+            var viewportTop = $(window).scrollTop();
+            var viewportBottom = viewportTop + $(window).height();
+            
+            if (elementBottom > viewportTop && elementTop < viewportBottom) {
+                if (!$(this).hasClass('fade-in-visible')) {
+                    $(this).addClass('fade-in-visible');
+                    $(this).animate({opacity: 1}, 600);
+                }
+            }
+        });
+    }
+    
+    $(window).on('scroll', checkScroll);
+    checkScroll();
+});
+</script>
+
 </body>
 </html>

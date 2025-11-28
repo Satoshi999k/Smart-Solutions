@@ -11,9 +11,11 @@ if ($conn->connect_error) {
 // Create orders table if it doesn't exist
 $createOrdersTable = "CREATE TABLE IF NOT EXISTS `orders` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT DEFAULT NULL,
     `customer_details` JSON DEFAULT NULL,
     `order_details` JSON DEFAULT NULL,
     `total_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `status` VARCHAR(50) DEFAULT 'processing',
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
@@ -43,24 +45,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     
-    // Calculate total price
+    // Calculate total price and build order items with full details
     $totalPrice = 0;
-    $products = json_decode(file_get_contents('products.json'), true)['products'] ?? [];
     
-    // Create a map of products by ID for easy lookup
-    $productsById = [];
-    foreach ($products as $product) {
-        $productsById[$product['id']] = $product;
-    }
-    
-    // Validate cart items and calculate total
+    // Build order items array with full product details from cart
+    $orderItems = [];
     foreach ($cart as $item) {
-        if (isset($item['id']) && isset($productsById[$item['id']])) {
-            $product = $productsById[$item['id']];
-            $quantity = $item['quantity'] ?? 1;
-            $totalPrice += $product['price'] * $quantity;
+        if (isset($item['id'])) {
+            $product_id = $item['id'];
+            $product_name = $item['name'] ?? 'Product';
+            $product_price = floatval($item['price'] ?? 0);
+            $quantity = intval($item['quantity'] ?? 1);
+            $subtotal = $product_price * $quantity;
+            $totalPrice += $subtotal;
+            
+            $orderItems[] = [
+                'product_id' => $product_id,
+                'product_name' => $product_name,
+                'quantity' => $quantity,
+                'price' => $product_price,
+                'subtotal' => $subtotal
+            ];
         }
     }
+    
+    // Prepare order details as JSON with full item information
+    $order_details_array = [
+        'items' => $orderItems
+    ];
+    $order_details = json_encode($order_details_array);
     
     // Insert order into database
     $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
@@ -72,20 +85,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'last_name' => $last_name,
         'email' => $customer_email,
         'address' => $address,
+        'apartment' => $apartment,
         'city' => $city,
+        'region' => $region,
         'postal_code' => $postal_code,
+        'country' => $country,
         'phone' => $phone,
         'payment_method' => $payment_method
     ]);
     
-    // Prepare order details (cart items) as JSON
-    $order_details = json_encode($cart);
-    
-    $insertOrderQuery = "INSERT INTO orders (customer_details, order_details, total_price) 
-                        VALUES ('$customer_details', '$order_details', $totalPrice)";
+    $insertOrderQuery = "INSERT INTO orders (user_id, customer_details, order_details, total_price, status) 
+                        VALUES (" . $_SESSION['user_id'] . ", '$customer_details', '$order_details', $totalPrice, 'processing')";
     
     if ($conn->query($insertOrderQuery) === TRUE) {
         $order_id = $conn->insert_id;
+        
+        // Store order information in session for thank you page
+        $_SESSION['order_id'] = $order_id;
+        $_SESSION['order_total'] = $totalPrice;
+        $_SESSION['customer_name'] = $first_name . ' ' . $last_name;
+        $_SESSION['order_items'] = $cart;
+        $_SESSION['customer_email'] = $customer_email;
         
         // ============ HANDLE BUY-NOW vs NORMAL CHECKOUT ============
         $is_buynow = (isset($_SESSION['is_buynow_checkout']) && $_SESSION['is_buynow_checkout']) || 

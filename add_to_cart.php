@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', 0); // Don't display errors in output
-ini_set('log_errors', 1); // Log errors to file instead
+ini_set('display_errors', 0);
+ini_set('log_errors', 1); 
 
 session_start();
 header('Content-Type: application/json; charset=utf-8');
@@ -25,11 +25,13 @@ $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : null;
 $product_name = isset($_POST['product_name']) ? trim($_POST['product_name']) : null;
 $product_price = isset($_POST['product_price']) ? floatval($_POST['product_price']) : 0.0;
 $product_image = isset($_POST['product_image']) ? trim($_POST['product_image']) : '';
-// Quantity requested by user (default 1)
 $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
 $quantity = $quantity < 1 ? 1 : $quantity;
 
+error_log("ADD_TO_CART: product_id=$product_id, name=$product_name, price=$product_price, qty=$quantity");
+
 if (!$product_id || !$product_name) {
+    error_log("ADD_TO_CART ERROR: Missing data - product_id: $product_id, product_name: $product_name");
     echo json_encode(['success' => false, 'message' => 'Missing product information.']);
     $conn->close();
     exit;
@@ -131,9 +133,13 @@ if (isset($_SESSION['user_id'])) {
 $conn->close();
 
 // Return cart summary
-// Count number of unique products (not total quantity)
 $totalItems = count($_SESSION['cart']);
 
-echo json_encode(['success' => true, 'message' => 'Added to cart', 'total_items' => $totalItems]);
+echo json_encode([
+    'success' => true, 
+    'message' => 'Added to cart', 
+    'total_items' => $totalItems,
+    'cart' => $_SESSION['cart']
+]);
 exit;
 ?>

@@ -11,6 +11,18 @@
 // Start session to check if the user is logged in
 session_start();
 
+// Function to calculate total cart quantity
+function getCartTotalQuantity() {
+    if (!isset($_SESSION['cart'])) {
+        return 0;
+    }
+    $total = 0;
+    foreach ($_SESSION['cart'] as $item) {
+        $total += isset($item['quantity']) ? $item['quantity'] : 1;
+    }
+    return $total;
+}
+
 // Database connection
 $conn = new mysqli("localhost", "root", "", "smartsolutions");
 
@@ -62,23 +74,21 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
         </div>
         <div class="search-bar">
             <input type="text" placeholder="Search">
-        <div class="search-icon">
-            <img src="../image/search-icon.png" alt="Search Icon">
+            <img class="search-icon" src="../image/search-icon.png" alt="Search" style="width: 20px; height: 20px; cursor: pointer;">
         </div>
-        </div>
-        <a href="location.html"><div class="location">
-            <img class="location" src="../image/location-icon.png" alt="location-icon">
+        <a href="location.php">
+            <div class="location">
+                <img class="location" src="../image/location-icon.png" alt="location-icon">
+            </div>
         </a>
-        </div>
         <div class="track">
-            <a href="track.html"><img class="track" src="../image/track-icon.png" alt="track-icon">
-        </a>
+            <a href="track.php"><img class="track" src="../image/track-icon.png" alt="track-icon"></a>
         </div>
         <a href="../cart.php">
             <div class="cart">
                 <img class="cart" src="../image/cart-icon.png" alt="cart-icon" style="width: 35px; height: auto;">
                 <span class="cart-counter">
-                    <?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?>
+                    <?php echo getCartTotalQuantity(); ?>
                 </span>
             </div>
         </a>
@@ -107,7 +117,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
             }
         </style>
         
-        <div class="login profile-dropdown">
+       <div class="login profile-dropdown">
             <a href="javascript:void(0)" onclick="toggleDropdown()">
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
@@ -118,15 +128,15 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
             </a>
             <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="profile.php">View Profile</a>
-                    <a href="edit-profile.php">Edit Profile</a>
-                    <a href="logout.php">Log Out</a>
+                    <a href="../user/profile.php">View Profile</a>
+                    <a href="../user/edit-profile.php">Edit Profile</a>
+                    <a href="../user/logout.php">Log Out</a>
                     <?php endif; ?>
                 </div>
             </div>
             <div class="login-text">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="profile.php"></a>
+                    <a href="../user/profile.php"></a>
                 <?php else: ?>
                     <a href="../user/register.php"><p>Login/<br>Sign In</p></a>
                 <?php endif; ?>

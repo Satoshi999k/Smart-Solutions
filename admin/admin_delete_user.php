@@ -57,6 +57,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delete User - Admin</title>
     <link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         * {
@@ -68,6 +69,20 @@ $conn->close();
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
         }
         
         .container {
@@ -170,7 +185,7 @@ $conn->close();
         <?php endif; ?>
         
         <div class="warning">
-            ⚠️ <strong>Warning:</strong> This action cannot be undone. All user data will be permanently deleted.
+            <i class="material-icons" style="vertical-align: middle; color: #ff9800; margin-right: 5px;">warning</i> <strong>Warning:</strong> This action cannot be undone. All user data will be permanently deleted.
         </div>
         
         <div class="user-info">

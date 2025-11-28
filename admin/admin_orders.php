@@ -22,6 +22,7 @@ $orders_result = $conn->query("SELECT * FROM orders ORDER BY created_at DESC");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders Management - Admin</title>
     <link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         * {
@@ -94,6 +95,22 @@ $orders_result = $conn->query("SELECT * FROM orders ORDER BY created_at DESC");
             margin-right: 10px;
             width: 20px;
             display: inline-block;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
         }
         
         .main-content {
@@ -162,29 +179,61 @@ $orders_result = $conn->query("SELECT * FROM orders ORDER BY created_at DESC");
         }
         
         .badge {
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
         }
         
-        .badge.success {
+        .badge.success,
+        .badge-completed {
             background: #d4edda;
             color: #155724;
         }
         
+        .badge-processing {
+            background: #cfe2ff;
+            color: #084298;
+        }
+        
+        .badge-shipped {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
         .action-btn {
-            padding: 6px 12px;
+            padding: 8px 14px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 600;
             background: #2196f3;
             color: white;
+            transition: all 0.3s ease;
+            display: inline-block;
+            min-width: 100px;
+            text-align: center;
         }
         
         .action-btn:hover {
-            opacity: 0.8;
+            background: #1976d2;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+        
+        .actions-cell {
+            white-space: nowrap;
+            width: 140px;
         }
         
         .no-data {
@@ -216,12 +265,12 @@ $orders_result = $conn->query("SELECT * FROM orders ORDER BY created_at DESC");
             </div>
             
             <div class="sidebar-menu">
-                <a href="/ITP122/admin/admin_dashboard.php"><i>📊</i> Dashboard</a>
-                <a href="/ITP122/admin/admin_orders.php" class="active"><i>🛒</i> Orders</a>
-                <a href="/ITP122/admin/admin_users.php"><i>👥</i> Users</a>
-                <a href="/ITP122/admin/admin_products.php"><i>📦</i> Products</a>
-                <a href="/ITP122/admin/admin_reports.php"><i>📈</i> Reports</a>
-                <a href="/ITP122/admin/admin_settings.php"><i>⚙️</i> Settings</a>
+                <a href="/ITP122/admin/admin_dashboard.php"><i class="material-icons">dashboard</i> Dashboard</a>
+                <a href="/ITP122/admin/admin_orders.php" class="active"><i class="material-icons">shopping_cart</i> Orders</a>
+                <a href="/ITP122/admin/admin_users.php"><i class="material-icons">people</i> Users</a>
+                <a href="/ITP122/admin/admin_products.php"><i class="material-icons">inventory_2</i> Products</a>
+                <a href="/ITP122/admin/admin_reports.php"><i class="material-icons">trending_up</i> Reports</a>
+                <a href="/ITP122/admin/admin_settings.php"><i class="material-icons">settings</i> Settings</a>
             </div>
         </div>
         
@@ -261,8 +310,24 @@ $orders_result = $conn->query("SELECT * FROM orders ORDER BY created_at DESC");
                             <td><?php echo htmlspecialchars($customer_name); ?></td>
                             <td>₱<?php echo number_format($order['total_price'], 2); ?></td>
                             <td><?php echo $item_count; ?> item(s)</td>
-                            <td><span class="badge success">Completed</span></td>
                             <td>
+                                <?php
+                                    $status = $order['status'] ?? 'Pending';
+                                    $badge_class = 'badge-pending';
+                                    
+                                    if ($status === 'completed') {
+                                        $badge_class = 'badge-completed';
+                                    } elseif ($status === 'shipped') {
+                                        $badge_class = 'badge-shipped';
+                                    } elseif ($status === 'processing') {
+                                        $badge_class = 'badge-processing';
+                                    } elseif ($status === 'cancelled') {
+                                        $badge_class = 'badge-cancelled';
+                                    }
+                                ?>
+                                <span class="badge <?php echo $badge_class; ?>"><?php echo ucfirst($status); ?></span>
+                            </td>
+                            <td class="actions-cell">
                                 <button class="action-btn" onclick="viewOrder(<?php echo $order['id']; ?>)">View Details</button>
                             </td>
                         </tr>

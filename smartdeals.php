@@ -1,13 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<link rel="shortcut icon" href="image/smartsolutionslogo.jpg" type="image/x-icon">
-<link rel="stylesheet" href="design.css" />
-<link rel="stylesheet" href="animations.css" />
-<meta charset="UTF-8">
-    <title>SMART DEALS - SMARTSOLUTIONS</title>
-</head>
-<body>
 <?php
 // Start session to check if the user is logged in
 session_start();
@@ -15,11 +5,23 @@ session_start();
 // Initialize cart from database
 require_once 'init_cart.php';
 
+// Function to calculate total cart quantity
+function getCartTotalQuantity() {
+    if (!isset($_SESSION['cart'])) {
+        return 0;
+    }
+    $total = 0;
+    foreach ($_SESSION['cart'] as $item) {
+        $total += isset($item['quantity']) ? $item['quantity'] : 1;
+    }
+    return $total;
+}
+
 // Database connection (replace with your credentials)
 $conn = new mysqli("localhost", "root", "", "smartsolutions");
 
 // Check if logged in
-$profile_picture = "image/login-icon.png"; // Default login icon
+$profile_picture = "/ITP122/image/login-icon.png"; // Default login icon
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
     
@@ -32,7 +34,7 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            $profile_picture = $row['profile_picture']; // Use user's profile picture
+            $profile_picture = "/ITP122/" . $row['profile_picture']; // Use user's profile picture
         }
     }
     $stmt->close();
@@ -53,35 +55,59 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
         'price' => $product_price
     ];
     $_SESSION['cart'] = $cart;
-
-    // Trigger JavaScript alert
-    echo "<script>alert('Item added to cart!');</script>";
 }
 ?>
 
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="shortcut icon" href="/ITP122/image/smartsolutionslogo.jpg" type="/ITP122/image/x-icon">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/ITP122/css/design.css" />
+<link rel="stylesheet" href="/ITP122/css/animations.css" />
+<meta charset="UTF-8">
+<title>SMART DEALS - SMARTSOLUTIONS</title>
+<style>
+@keyframes slideDownMenu {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#main-menu {
+    animation: slideDownMenu 0.6s ease-out 0.3s both;
+}
+</style>
+</head>
+<body>
 <header>
     <div class="ssheader">
         <div class="logo">
-            <img src="image/logo.png" alt="Smart Solutions Logo">
+            <img src="/ITP122/image/logo.png" alt="Smart Solutions Logo">
         </div>
         <div class="search-bar">
             <input type="text" placeholder="Search">
         <div class="search-icon">
-            <img src="image/search-icon.png" alt="Search Icon">
+            <img src="/ITP122/image/search-icon.png" alt="Search Icon">
         </div>
         </div>
-        <a href="location.php"><div class="location">
-            <img class="location" src="image/location-icon.png" alt="location-icon">
+        <a href="/ITP122/pages/location.php"><div class="location">
+            <img class="location" src="/ITP122/image/location-icon.png" alt="location-icon">
         </a>
         </div>
         <div class="track">
-            <a href="track.php"><img class="track" src="image/track-icon.png" alt="track-icon"></a>
+            <a href="/ITP122/pages/track.php"><img class="track" src="/ITP122/image/track-icon.png" alt="track-icon"></a>
         </div>
-        <a href="cart.php">
+        <a href="../cart.php">
             <div class="cart">
-                <img class="cart" src="image/cart-icon.png" alt="cart-icon" style="width: 35px; height: auto;">
+                <img class="cart" src="/ITP122/image/cart-icon.png" alt="cart-icon" style="width: 35px; height: auto;">
                 <span class="cart-counter">
-                    <?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?>
+                    <?php echo getCartTotalQuantity(); ?>
                 </span>
             </div>
         </a>
@@ -109,39 +135,40 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
                 box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
             }
         </style>
-        <div class="login profile-dropdown" style="position: relative; display: inline-block;">
+        <div class="login profile-dropdown">
             <a href="javascript:void(0)" onclick="toggleDropdown()">
                 <!-- Check if user is logged in, if yes show profile picture, else show login icon -->
                 <img class="login" 
-                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : 'image/login-icon.png'; ?>" 
-                     alt="login-icon" 
-                     style="border-radius: <?php echo isset($_SESSION['user_id']) ? '50%' : '0'; ?>; 
+                    src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : 'image/login-icon.png'; ?>" 
+                    alt="login-icon" 
+                    style="border-radius: <?php echo isset($_SESSION['user_id']) ? '50%' : '0'; ?>; 
                             width: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>; 
                             height: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>;">
             </a>
-            <div id="dropdown-menu" class="dropdown-content" style="display: none; position: absolute; background-color: #f9f9f9; min-width: 160px; box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); z-index: 1; border-radius: 5px;">
+            <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    
-                    <a href="logout.php" style="color: black; padding: 12px 16px; text-decoration: none; display: block;">Log Out</a>
+                    <a href="../user/profile.php">View Profile</a>
+                    <a href="../user/edit-profile.php">Edit Profile</a>
+                    <a href="../user/logout.php">Log Out</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="login-text">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="../user/profile.php"></a>
+                <?php else: ?>
+                    <a href="../user/register.php"><p>Login/<br>Sign In</p></a>
                 <?php endif; ?>
-            </div>  
-        </div>
-        <div class="login-text">
-            <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="profile.php"></a>
-            <?php else: ?>
-                <a href="register.php"><p>Login/<br>Sign In</p></a>
-            <?php endif; ?>
-        </div>
+            </div>
     </div>
     </header>
 
-<div class="menu">
+<div class="menu" id="main-menu">
     <a href="index.php">HOME</a>
-    <a href="product.php">PRODUCTS</a>
+    <a href="pages/product.php">PRODUCTS</a>
     <a href="products/desktop.php">DESKTOP</a>
     <a href="products/laptop.php">LAPTOP</a>
-    <a href="brands.php">BRANDS</a>
+    <a href="pages/brands.php">BRANDS</a>
 </div>
 
 <div class="breadcrumb">
@@ -184,7 +211,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
                 <div class='original-price'>₱<?php echo number_format($product['original_price'], 2); ?></div>
             </div>
              <div class='button-group'>
-                <a href='<?php echo (isset($_SESSION['user_id']) ? "checkout.php" : "register.php"); ?>'>
+                <a href="#" class="buy-now-btn" data-id="<?php echo $product['id']; ?>" data-name="<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>" data-price="<?php echo $product['price']; ?>" data-image="<?php echo $product['image']; ?>">
                     <button class='buy-now'>BUY NOW</button>
                 </a>
                 <a href="#" class="ajax-add" data-id="<?php echo $product['id']; ?>" data-name="<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>" data-price="<?php echo $product['price']; ?>" data-image="<?php echo $product['image']; ?>">
@@ -262,8 +289,105 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
             dropdownMenu.style.display = 'none';  // Hide the dropdown menu if clicked outside
         }
     };
+    
+    // Handle buy now button
+    document.addEventListener('click', function(e) {
+        let target = e.target.closest('a.buy-now-btn');
+        if (!target) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const productId = target.getAttribute('data-id');
+        const productName = target.getAttribute('data-name');
+        const productPrice = target.getAttribute('data-price');
+        const productImage = target.getAttribute('data-image');
+        
+        if (!productId) return;
+        
+        // Send product to session via fetch
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('product_name', productName);
+        formData.append('product_price', productPrice);
+        formData.append('product_image', productImage);
+        formData.append('quantity', 1);
+        formData.append('buy_now', '1');
+        
+        fetch('set_buynow_product.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = 'checkout.php';
+            }
+        })
+        .catch(err => console.log(err));
+    });
+    
+    // Custom add to cart handler for smartdeals (root level page)
+    document.addEventListener('click', function(e) {
+        let target = e.target.closest('a.ajax-add');
+        if (!target) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const productId = target.getAttribute('data-id');
+        const productName = target.getAttribute('data-name');
+        const productPrice = target.getAttribute('data-price');
+        const productImage = target.getAttribute('data-image');
+        
+        console.log('Add to cart clicked:', {productId, productName, productPrice, productImage});
+        
+        if (!productId || !productName) {
+            console.log('Missing product data');
+            return;
+        }
+        
+        // Show quantity modal
+        const quantity = prompt('Enter quantity:', '1');
+        if (quantity === null || quantity === '' || isNaN(quantity) || quantity < 1) {
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('product_name', productName);
+        formData.append('product_price', productPrice);
+        formData.append('product_image', productImage);
+        formData.append('quantity', parseInt(quantity));
+        
+        console.log('Sending to add_to_cart.php');
+        
+        fetch('add_to_cart.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Response:', data);
+            if (data && data.total_items) {
+                const cartSpan = document.querySelector('.cart-counter');
+                if (cartSpan) {
+                    cartSpan.textContent = data.total_items;
+                }
+                alert('Added to cart successfully!');
+            } else if (data && data.success) {
+                alert('Added to cart successfully!');
+                location.reload();
+            }
+        })
+        .catch(err => {
+            console.log('Error:', err);
+            alert('Error adding to cart');
+        });
+    });
 </script>
-<script src="search.js"></script>
-<script src="ajax-cart.js"></script>
+<script src="js/search.js"></script>
+<script src="js/jquery-animations.js"></script>
 </body>
 </html>
+

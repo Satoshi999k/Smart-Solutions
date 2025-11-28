@@ -3,25 +3,25 @@
     	"id": 1,
     	"name" :"Core i7 12700 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
     	"price":25195.00,
-    	"image": "image/desktop1.png"
+    	"image": "image/Core_i7.png"
     },
     {
     	"id": 2,
     	"name" :"Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W",
     	"price":14795.00,
-    	"image": "image/desktop2.png"
+    	"image": "image/Core_i3.png"
     },
     {
     	"id": 3,
     	"name" :"MSI Thin A15 B7UCX-084PH 15.6/ FHD 144Hz AMD RYZEN 5 7535HS/ 8GB/ 512GBSSD/RTX 2050 4GB/ WIN11 Laptop",
     	"price":38995.00,
-    	"image": "image/laptop1.png"
+    	"image": "image/msithin.png"
     },
     {
     	"id": 4,
     	"name" :"Lenovo V15 G4 IRU 15.6/ FHD Intel Core i5- 1335U/ 8GB DDR4/ 512GB M.2 SSD Laptop MN",
     	"price":29495.00,
-    	"image": "image/laptop2.png"
+    	"image": "image/ideapad.png"
     },
     {
     	"id": 5,

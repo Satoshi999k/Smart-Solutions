@@ -5,6 +5,15 @@ session_start();
 // Initialize cart from database
 require_once 'init_cart.php';
 
+// Function to calculate total cart quantity
+function getCartTotalQuantity() {
+    if (!isset($_SESSION['cart'])) {
+        return 0;
+    }
+    // Count unique products (items), not total quantity
+    return count($_SESSION['cart']);
+}
+
 // Database connection (replace with your credentials)
 $conn = new mysqli("localhost", "root", "", "smartsolutions");
 
@@ -32,12 +41,42 @@ if (isset($_SESSION['user_id'])) {
     $stmt->close();
 }
 
-// Define the products array
-$products = [
-    ["id" => 1, "name" => "Core i7 12700 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 25195.00, "image" => "image/desktop1.png"],
-    ["id" => 2, "name" => "Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 14795.00, "image" => "image/desktop2.png"],
-    ["id" => 3, "name" => "MSI Thin A15 B7UCX-084PH 15.6 / FHD 144Hz AMD RYZEN 5 7535HS/8GB/512GBSSD/RTX 2050 4GB/WIN11 Laptop", "price" => 38995.00, "image" => "image/laptop1.png"],
-    ["id" => 4, "name" => "Lenovo V15 G4 IRU 15.6 / FHD Intel Core i5- 1335U/8GB DDR4/512GB M.2 SSD Laptop MN", "price" => 29495.00, "image" => "image/laptop2.png"],
+// Fetch products from database instead of hardcoded array
+$products = [];
+if (!empty($cart)) {
+    // Get all product IDs from cart
+    $cart_ids = array_column($cart, 'id');
+    $placeholders = implode(',', array_fill(0, count($cart_ids), '?'));
+    
+    // Build query with proper type string
+    $query = "SELECT id, name, price, image FROM products WHERE id IN ($placeholders)";
+    $stmt = $conn->prepare($query);
+    
+    if ($stmt) {
+        // Create type string dynamically
+        $types = str_repeat('i', count($cart_ids));
+        $stmt->bind_param($types, ...$cart_ids);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+            // Handle image path - if relative, prepend /ITP122/
+            if (!empty($row['image']) && strpos($row['image'], '/') !== 0 && strpos($row['image'], 'http') !== 0) {
+                $row['image'] = '/ITP122/' . $row['image'];
+            }
+            $products[] = $row;
+        }
+        $stmt->close();
+    }
+}
+
+// Fallback: Define the products array (empty since we fetch from DB)
+if (empty($products)) {
+    $products = [
+    ["id" => 1, "name" => "Core i7 12700 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 25195.00, "image" => "image/Core_i7.png"],
+    ["id" => 2, "name" => "Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 14795.00, "image" => "image/Core_i3.png"],
+    ["id" => 3, "name" => "MSI Thin A15 B7UCX-084PH 15.6 / FHD 144Hz AMD RYZEN 5 7535HS/8GB/512GBSSD/RTX 2050 4GB/WIN11 Laptop", "price" => 38995.00, "image" => "image/msithin.png"],
+    ["id" => 4, "name" => "Lenovo V15 G4 IRU 15.6 / FHD Intel Core i5- 1335U/8GB DDR4/512GB M.2 SSD Laptop MN", "price" => 29495.00, "image" => "image/idealpad.png"],
     ["id" => 5, "name" => "Team Elite Vulcan TUF 16gb 2x8 3200mhz Ddr4 Gaming Memory", "price" => 1999.00, "image" => "image/deal1.png"],
     ["id" => 6, "name" => "Team Elite Plus 8gb 1x8 3200Mhz Black Gold Ddr4 Memory", "price" => 1045.00, "image" => "image/deal2.png"],
     ["id" => 7, "name" => "G.Skill Ripjaws V 16gb 2x8 3200mhz Ddr4 Memory Black", "price" => 2185.00, "image" => "image/deal3.png"],
@@ -196,7 +235,8 @@ $products = [
   ["id" => 160, "name" => "Edifier W800BT Plus Black, Red & White Built-in microphone 8.0 noise cancellation Bluetooth v5.1 Stereo Headphones 19GLO", "price" => 1345.00, "image" => "image/edifier.png"],
   ["id" => 161, "name" => "Kingston KVR32S22S8/16 16gb 1x16 3200mhz Low-power auto self-refresh Ddr4 Sodimm Memory", "price" => 3350.00, "image" => "image/kingston.png"],
   ["id" => 162, "name" => "AMD Ryzen 7 5700G Socket Am4 3.8GHz with Radeon Vega 8 Processor", "price" => 11195.00, "image" => "image/ryzen7.png"],
-];
+    ];
+}
 
 // Check if there are items in the cart
 // Load cart from database if user is logged in and session cart is empty or doesn't match
@@ -270,6 +310,28 @@ if (isset($_SESSION['user_id'])) {
 }
 
 $cart = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
+
+// Clean up cart - remove items with invalid/missing product data
+if (!empty($cart)) {
+    $cleanedCart = [];
+    foreach ($cart as $item) {
+        // Check if product exists in the products array
+        $productExists = false;
+        foreach ($products as $product) {
+            if ($product['id'] == $item['id']) {
+                $productExists = true;
+                break;
+            }
+        }
+        // Only keep items that have valid products
+        if ($productExists) {
+            $cleanedCart[] = $item;
+        }
+    }
+    $_SESSION['cart'] = $cleanedCart;
+    $cart = $cleanedCart;
+}
+
 $total = 0;
 // Handle item removal
 if (isset($_GET['remove'])) {
@@ -307,105 +369,338 @@ if (isset($_GET['remove'])) {
 <html>
 <head>
     <link rel="shortcut icon" href="image/smartsolutionslogo.jpg" type="image/x-icon">
-    <link rel="stylesheet" href="design.css" />
-    <link rel="stylesheet" href="animations.css" />
+    <link rel="stylesheet" href="css/design.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" href="css/animations.css?v=<?php echo time(); ?>" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <meta charset="UTF-8">
     <title>SHOPPING CART - SMARTSOLUTIONS</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        table {
-            width: calc(100% - 80px);
-            border-collapse: collapse;
-            margin-left: 40px;
-            margin-right: 40px;
+        body { background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%) !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .breadcrumb { padding: 18px 32px; font-size: 14px; color: #666; background: transparent; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .breadcrumb a { color: #0062F6; text-decoration: none; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; }
+        .breadcrumb a:hover { color: #0052D4; transform: translateX(4px); }
+        .breadcrumb .material-icons { font-size: 20px; vertical-align: middle; }
+        .breadcrumb span:not(.material-icons) { display: inline-flex; align-items: center; }
+        @keyframes slideDownMenu {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
+        #main-menu {
+            animation: slideDownMenu 0.6s ease-out 0.3s both;
+        }
+        
+        /* Modern Cart Table Styles */
+        .cart-table-wrapper {
+            background: white;
+            border-radius: 16px;
+            margin: 30px auto;
+            width: calc(100% - 60px);
+            max-width: 1200px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        .cart-table-header {
+            background: linear-gradient(45deg, #007BFF 0%, #0056b3 25%, #003f87 50%, #0056b3 75%, #007BFF 100%);
+            padding: 25px 30px;
+            color: white;
+        }
+        
+        .cart-table-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .cart-table-header i {
+            font-family: 'Material Icons';
+            font-size: 28px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            padding: 18px 20px;
+            text-align: center;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            color: #34495e;
+            font-size: 14px;
+        }
+        
+        th:last-child,
+        td:last-child {
+            border-right: none;
+        }
+        
+        .checkbox-col {
+            width: 60px;
             text-align: center;
         }
-        th {
-            background-color: #f4f4f4;
+        
+        .checkbox-col input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #007BFF;
         }
-        img {
-            width: 100px;
-            height: auto;
-            border-radius: 15px;
+        
+        table img {
+            width: 90px;
+            height: 90px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            object-fit: cover;
         }
+        
         td:first-child {
             border-right: none;
-            padding-right: 5px;
-            width: 120px;
+            padding-right: 10px;
+            width: 110px;
         }
+        
         td:nth-child(2) {
             border-left: none;
-            padding-left: 5px;
+            padding-left: 10px;
             text-align: left;
+            font-weight: 500;
+            color: #2c3e50;
         }
+        
         .remove-button {
             color: white;
-            background-color: red;
+            background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
             border: none;
-            padding: 5px 10px;
+            padding: 10px 16px;
             cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
         }
+        
+        .remove-button:hover {
+            background: linear-gradient(135deg, #e53935 0%, #d32f2f 100%);
+            box-shadow: 0 4px 16px rgba(244, 67, 54, 0.3);
+            transform: translateY(-2px);
+        }
+        
         .quantity-controls {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 8px;
         }
+        
         .quantity-btn {
-            width: 30px;
-            height: 30px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
+            width: 36px;
+            height: 36px;
+            border: 2px solid #e8e8e8;
+            background-color: white;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            border-radius: 3px;
-            transition: background-color 0.2s;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            color: #007BFF;
         }
+        
         .quantity-btn:hover {
-            background-color: #e9e9e9;
-        }
-        .quantity-display {
-            min-width: 30px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .total {
-            text-align: right;
-            margin-right: 30px;
-            margin-top: 20px;
-            margin-bottom: 15px;
-        }
-        .checkout-container {
-            display: flex;
-            justify-content: flex-end; 
-            margin-right: 30px; 
-        }
-        .checkout {
             background-color: #007BFF;
             color: white;
-            border: none;
-            padding: 10px 20px;
+            border-color: #007BFF;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+        }
+        
+        .quantity-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .total {
+            text-align: right;
+            margin: 0;
+            font-weight: 700;
+            color: #007BFF;
             font-size: 16px;
+        }
+        
+        /* Cart Summary Section */
+        .checkout-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8eef5 100%);
+            border-radius: 12px;
+            border-left: 4px solid #007BFF;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
+        }
+        
+        .checkout-left {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .selected-count {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .selected-count i {
+            font-family: 'Material Icons';
+            font-size: 18px;
+            color: #007BFF;
+        }
+        
+        .total-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: #007BFF;
+        }
+        
+        .checkout-button-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .checkout {
+            background: linear-gradient(45deg, #007BFF 0%, #0056b3 25%, #003f87 50%, #0056b3 75%, #007BFF 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
-            border-radius: 5px;
-            margin-top: 15px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkout i {
+            font-family: 'Material Icons';
+            font-size: 20px;
+        }
+        
+        .checkout:hover {
+            background: linear-gradient(45deg, #0056b3 0%, #003f87 25%, #002d63 50%, #003f87 75%, #0056b3 100%);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .continue-shopping {
+            background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+            color: #2c3e50;
+            border: none;
+            padding: 14px 32px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .continue-shopping:hover {
+            background: linear-gradient(135deg, #eeeeee 0%, #e0e0e0 100%);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        /* Empty Cart Message */
+        .empty-cart {
+            text-align: center;
+            padding: 60px 30px;
+            background: white;
+            border-radius: 16px;
+            margin: 30px auto;
+            width: calc(100% - 60px);
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .empty-cart i {
+            font-family: 'Material Icons';
+            font-size: 72px;
+            color: #bdbdbd;
             margin-bottom: 15px;
         }
-        .checkout:hover {
-            background-color: #0056b3;
+        
+        .empty-cart h3 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin: 0 0 10px 0;
+        }
+        
+        .empty-cart p {
+            color: #999;
+            font-size: 14px;
+            margin: 0 0 30px 0;
         }
         
         html, body {
-            height: 100%;
+            margin: 0;
+            padding: 0;
         }
         body {
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            flex-shrink: 0;
         }
         .main-content {
             flex: 1;
@@ -417,6 +712,32 @@ if (isset($_GET['remove'])) {
         .copyright {
             margin-top: 0 !important;
         }
+        
+        /* Material Icons class for proper rendering */
+        .material-icon {
+            font-family: 'Material Icons' !important;
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .material-icon.small {
+            font-size: 16px;
+        }
+        
+        .remove-button .material-icon {
+            font-size: 16px;
+            margin-right: 4px;
+        }
     </style>
 </head>
 <body>
@@ -427,23 +748,21 @@ if (isset($_GET['remove'])) {
         </div>
         <div class="search-bar">
             <input type="text" placeholder="Search">
-            <div class="search-icon">
-
+            <img class="search-icon" src="image/search-icon.png" alt="Search" style="width: 20px; height: 20px; cursor: pointer;">
+        </div>
+        <a href="pages/location.php">
+            <div class="location">
+                <img class="location" src="image/location-icon.png" alt="location-icon">
             </div>
-        </div>
-        <a href="location.php"><div class="location">
-            <img class="location" src="image/location-icon.png" alt="location-icon">
         </a>
-        </div>
         <div class="track">
-            <a href="track.php"><img class="track" src="image/track-icon.png" alt="track-icon">
-            </a>
+            <a href="pages/track.php"><img class="track" src="image/track-icon.png" alt="track-icon"></a>
         </div>
         <a href="cart.php">
             <div class="cart">
                 <img class="cart" src="image/cart-icon.png" alt="cart-icon" style="width: 35px; height: auto;">
                 <span class="cart-counter">
-                    <?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?>
+                    <?php echo getCartTotalQuantity(); ?>
                 </span>
             </div>
         </a>
@@ -483,9 +802,9 @@ if (isset($_GET['remove'])) {
         </a>
         <div id="dropdown-menu" class="dropdown-content">
             <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="profile.php">View Profile</a>
-                <a href="edit-profile.php">Edit Profile</a>
-                <a href="logout.php">Log Out</a>
+                <a href="user/profile.php">View Profile</a>
+                <a href="user/edit-profile.php">Edit Profile</a>
+                <a href="user/logout.php">Log Out</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -493,39 +812,41 @@ if (isset($_GET['remove'])) {
             <?php if (isset($_SESSION['user_id'])): ?>
                 <a href="profile.php"></a>
             <?php else: ?>
-                <a href="register.php"><p>Login/<br>Sign In</p></a>
+                <a href="user/register.php"><p>Login/<br>Sign In</p></a>
             <?php endif; ?>
         </div>
     </div>
     </header>
 
 <div class="main-content">
-<div class="menu">
+<div class="menu" id="main-menu">
     <a href="index.php">HOME</a>
-    <a href="product.php">PRODUCTS</a>
-    <a href="desktop.php">DESKTOP</a>
-    <a href="laptop.php">LAPTOP</a>
-    <a href="brands.php">BRANDS</a>
+    <a href="pages/product.php">PRODUCTS</a>
+    <a href="products/desktop.php">DESKTOP</a>
+    <a href="products/laptop.php">LAPTOP</a>
+    <a href="pages/brands.php">BRANDS</a>
 </div>
 
 <div class="breadcrumb">
-    <a href="index.php">Home</a> >
-    <a>Shopping Cart</a>
+    <a href="index.php"><span class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px;">home</span>Home</a> > <span class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px; color: #0062F6;">shopping_cart</span><a>Shopping Cart</a>
 </div>
 
-<div class="processor-section">
-    <h2>SHOPPING CART</h2>
-</div>
-    <table>
-        <thead>
-            <tr>
-                <th colspan="2">Product Name</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Subtotal</th>
-                <th>Remove Item</th>
-            </tr>
-        </thead>
+<div class="main-content">
+    <div class="cart-table-wrapper">
+        <div class="cart-table-header">
+            <h2><i class="material-icon">shopping_cart</i>Your Shopping Cart</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="checkbox-col"><input type="checkbox" id="select-all-checkbox" title="Select all items"></th>
+                    <th colspan="2">Product Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
         <tbody>
             <?php if (!empty($cart)): ?>
                 <?php foreach ($cart as $index => $item): ?>
@@ -535,10 +856,21 @@ if (isset($_GET['remove'])) {
                         return $p['id'] == $item['id'];
                     });
                     $product = reset($product);
+                    
+                    // Skip if product not found
+                    if (!$product) continue;
+                    
                     $quantity = isset($item['quantity']) ? $item['quantity'] : 1;
                     $subtotal = $product['price'] * $quantity;
                     ?>
                     <tr>
+                        <td class="checkbox-col">
+                            <input type="checkbox" class="item-checkbox" 
+                                   data-index="<?php echo $index; ?>" 
+                                   data-price="<?php echo floatval($product['price']); ?>" 
+                                   data-quantity="<?php echo intval($quantity); ?>"
+                                   title="Price: <?php echo $product['price']; ?>, Qty: <?php echo $quantity; ?>">
+                        </td>
                         <td>
                             <img src="<?php echo htmlspecialchars($product['image']); ?>" 
                                  alt="<?php echo htmlspecialchars($product['name']); ?>">
@@ -554,8 +886,8 @@ if (isset($_GET['remove'])) {
                         </td>
                         <td><span id="subtotal-<?php echo $index; ?>">₱<?php echo number_format($subtotal, 2); ?></span></td>
                         <td>
-                            <a href="cart.php?remove=<?php echo $index; ?>">
-                                <button class="remove-button">Remove</button>
+                            <a href="cart.php?remove=<?php echo $index; ?>" style="text-decoration: none;">
+                                <button class="remove-button" title="Remove item from cart"><i class="material-icon">delete</i></button>
                             </a>
                         </td>
                     </tr>
@@ -563,46 +895,56 @@ if (isset($_GET['remove'])) {
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 60px 20px;">
-                        <div style="text-align: center; background-color: #f8f9fa; border-radius: 8px; padding: 40px; border: 2px dashed #ddd;">
-                            <div style="font-size: 64px; margin-bottom: 20px;">🛒</div>
-                            <h2 style="margin: 0 0 10px 0; color: #333; font-size: 28px;">Your Cart is Empty</h2>
-                            <p style="margin: 0 0 30px 0; color: #666; font-size: 14px; line-height: 1.6;">You haven't added any items to your cart yet.<br>Start shopping to find great deals on computer parts and accessories!</p>
-                            <a href="index.php" class="btn" style="background-color: #0062F6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block; cursor: pointer; font-weight: bold; transition: all 0.3s ease;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Continue Shopping</a>
+                    <td colspan="7">
+                        <div class="empty-cart">
+                            <i class="material-icon" style="font-size: 72px; margin-bottom: 15px; display: block;">shopping_cart</i>
+                            <h3>Your Cart is Empty</h3>
+                            <p>You haven't added any items yet. Start shopping to find great deals on computer parts!</p>
+                            <a href="index.php" class="continue-shopping"><i class="material-icon">arrow_back</i>Continue Shopping</a>
                         </div>
                     </td>
                 </tr>
             <?php endif; ?>
         </tbody>
     </table>
-    <div class="checkout-container">
-    <h2 class="total">Total: ₱<?php echo number_format($total, 2); ?></h2>
-        <?php if ($cartEmpty): ?>
-            <button class="checkout" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;" title="Your cart is empty. Please add items to checkout.">Proceed to Checkout</button>
-        <?php else: ?>
-            <a href="checkout.php"><button class="checkout">Proceed to Checkout</button></a>
-        <?php endif; ?>
+    <div class="checkout-info">
+        <div class="checkout-left">
+            <span class="selected-count"><i class="material-icon small">shopping_bag</i>Selected: <strong id="selected-count">0</strong> item(s)</span>
+            <div class="total-price">Total: <span id="selected-total">₱0.00</span></div>
+        </div>
+        <div class="checkout-button-container">
+            <?php if ($cartEmpty): ?>
+                <button class="checkout" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;" title="Your cart is empty">
+                    <i class="material-icon">lock</i>Proceed to Checkout
+                </button>
+            <?php else: ?>
+                <button class="checkout" id="checkout-btn" type="button" onclick="proceedToCheckout(); return false;">
+                    <i class="material-icon">payment</i>Proceed to Checkout
+                </button>
+            <?php endif; ?>
+            <a href="index.php" class="continue-shopping"><i class="material-icon">arrow_back</i>Continue Shopping</a>
+        </div>
     </div>
 </div>
     <footer class="footer">
     <div class="footer-col">
         <h3>Customer Service</h3>
         <ul>
-            <li><a href="paymentfaq.php">Payment FAQs</a></li>
-            <li><a href="ret&ref.php">Return and Refunds</a></li>
+            <li><a href="pages/paymentfaq.php">Payment FAQs</a></li>
+            <li><a href="pages/ret&ref.php">Return and Refunds</a></li>
         </ul>
     </div>
     <div class="footer-col">
         <h3>Company</h3>
         <ul>
-            <li><a href="about_us.php">About Us</a></li>
-            <li><a href="contact_us.php">Contact Us</a></li>
+            <li><a href="pages/about_us.php">About Us</a></li>
+            <li><a href="pages/contact_us.php">Contact Us</a></li>
         </ul>
     </div>
     <div class="footer-col">
         <h3>Links</h3>
         <ul>
-            <li><a href="corporate.php">SmartSolutions Corporate</a></li>
+            <li><a href="pages/corporate.php">SmartSolutions Corporate</a></li>
             <li><a href="https://web.facebook.com/groups/1581265395842396" target="_blank">SmartSolutions Community</a></li>
         </ul>
     </div>
@@ -662,120 +1004,319 @@ if (isset($_GET['remove'])) {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.text())
-            .then(text => {
-                console.log('Raw response:', text);
-                try {
-                    var data = JSON.parse(text);
-                    console.log('Parsed response:', data);
-                    console.log('Cart total from server:', data.cart_total);
-                    
-                    if (data.success) {
-                        // Update the quantity display
-                        document.getElementById('qty-' + itemIndex).textContent = data.new_quantity;
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the quantity display
+                    document.getElementById('qty-' + itemIndex).textContent = data.new_quantity;
 
-                        // Get the product price from the table - find the row first
-                        var qtyElement = document.getElementById('qty-' + itemIndex);
-                        var row = qtyElement.closest('tr');
-                        var priceText = row.cells[2].textContent;
-                        var price = parseFloat(priceText.replace('₱', '').replace(/,/g, ''));
+                    // Get the price from the checkbox data attribute
+                    var row = document.getElementById('qty-' + itemIndex).closest('tr');
+                    var checkbox = row.querySelector('.item-checkbox');
+                    var price = parseFloat(checkbox.getAttribute('data-price'));
 
-                        // Update the subtotal
+                    // Update the subtotal in real-time
+                    if (!isNaN(price)) {
                         var newSubtotal = price * data.new_quantity;
                         var formattedSubtotal = '₱' + newSubtotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                         document.getElementById('subtotal-' + itemIndex).textContent = formattedSubtotal;
-
-                        // Update the cart total - find all possible total elements
-                        var formattedTotal = '₱' + data.cart_total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-                        
-                        // Try multiple selectors to find the total element
-                        var totalElement = document.querySelector('h2.total');
-                        console.log('Total element found:', totalElement);
-                        
-                        if (!totalElement) {
-                            totalElement = document.querySelector('.total');
-                        }
-                        
-                        if (totalElement) {
-                            console.log('Updating total to:', formattedTotal);
-                            totalElement.textContent = 'Total: ' + formattedTotal;
-                        } else {
-                            console.error('Could not find total element');
-                        }
-
-                        // Update cart counter if quantity is 0
-                        if (data.new_quantity === 0) {
-                            location.reload();
-                        }
-                    } else {
-                            console.error('Error from server:', data.message);
-                        alert('Error updating quantity: ' + data.message);
-                        // Reload page to sync state
-                        setTimeout(() => location.reload(), 1000);
                     }
-                } catch(e) {
-                    console.error('JSON Parse error:', e);
-                    console.error('Response text:', text);
-                    alert('An error occurred while updating the quantity.');
-                    setTimeout(() => location.reload(), 1000);
+
+                    // Update the checkbox data-quantity attribute
+                    if (checkbox) {
+                        checkbox.setAttribute('data-quantity', data.new_quantity);
+                    }
+                    
+                    // Refresh the selected total if this item is checked
+                    if (checkbox && checkbox.checked) {
+                        updateSelectedInfo();
+                    }
+
+                    // Update cart counter if quantity is 0
+                    if (data.new_quantity === 0) {
+                        location.reload();
+                    }
+                } else {
+                    alert('Error updating quantity: ' + data.message);
+                    location.reload();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('An error occurred while updating the quantity.');
+                location.reload();
             });
         }
     </script>
 
     <!-- Empty Cart Validation Script -->
     <script>
-    $(document).ready(function() {
-        // Function to check if cart is empty
-        function isCartEmpty() {
-            // Check session variable in PHP
-            var cartEmpty = <?php echo json_encode($cartEmpty); ?>;
-            return cartEmpty;
-        }
-
-        // Disable checkout button if cart is empty
-        function updateCheckoutButton() {
-            var $checkoutBtn = $('.checkout');
-            var isEmpty = isCartEmpty();
+    // Update selected count and total when checkboxes change - GLOBAL FUNCTION
+    function updateSelectedInfo() {
+        let selectedCount = 0;
+        let selectedTotal = 0;
+        
+        // Get all checkboxes
+        const allCheckboxes = document.querySelectorAll('.item-checkbox');
+        console.log('Total checkboxes found:', allCheckboxes.length);
+        
+        allCheckboxes.forEach((checkbox, idx) => {
+            console.log(`Checkbox ${idx}: checked=${checkbox.checked}, data-price=${checkbox.getAttribute('data-price')}, data-quantity=${checkbox.getAttribute('data-quantity')}`);
             
-            if (isEmpty) {
-                $checkoutBtn.prop('disabled', true)
-                    .css({
-                        'opacity': '0.5',
-                        'cursor': 'not-allowed',
-                        'pointer-events': 'none'
-                    })
-                    .attr('title', 'Your cart is empty. Please add items to checkout.');
+            if (checkbox.checked) {
+                selectedCount++;
                 
-                // Prevent any checkout attempts
-                $checkoutBtn.on('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    // Show alert
-                    alert('Your cart is empty! Please add items before checking out.');
-                    return false;
-                });
+                // Get data attributes safely
+                const priceAttr = checkbox.getAttribute('data-price');
+                const quantityAttr = checkbox.getAttribute('data-quantity');
+                
+                console.log(`  -> Selected! Price attr: "${priceAttr}", Qty attr: "${quantityAttr}"`);
+                
+                const price = parseFloat(priceAttr);
+                const quantity = parseInt(quantityAttr);
+                
+                console.log(`  -> Parsed: price=${price}, qty=${quantity}`);
+                
+                // Only add if both are valid numbers
+                if (!isNaN(price) && !isNaN(quantity)) {
+                    selectedTotal += (price * quantity);
+                    console.log(`  -> Added to total: ${price} * ${quantity} = ${price * quantity}, Running total: ${selectedTotal}`);
+                }
+            }
+        });
+        
+        console.log('Final - Selected count:', selectedCount, 'Selected total:', selectedTotal);
+        
+        // Update the display elements
+        const countEl = document.getElementById('selected-count');
+        const totalEl = document.getElementById('selected-total');
+        
+        if (countEl) {
+            countEl.textContent = selectedCount;
+        }
+        
+        if (totalEl) {
+            const formattedTotal = '₱' + selectedTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            totalEl.textContent = formattedTotal;
+            console.log('Updated total display to:', formattedTotal);
+        }
+        
+        // Update checkout button state
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (checkoutBtn) {
+            if (selectedCount === 0) {
+                checkoutBtn.disabled = true;
+                checkoutBtn.style.opacity = '0.5';
+                checkoutBtn.style.cursor = 'not-allowed';
+            } else {
+                checkoutBtn.disabled = false;
+                checkoutBtn.style.opacity = '1';
+                checkoutBtn.style.cursor = 'pointer';
             }
         }
-
-        // Initialize on page load
-        updateCheckoutButton();
-
-        // Monitor cart changes
-        $(document).on('change', '.quantity-input, #qty-input', function() {
-            setTimeout(updateCheckoutButton, 500);
+    }
+    
+    $(document).ready(function() {
+        // Handle individual item checkbox with immediate update
+        document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSelectedInfo();
+                updateSelectAllCheckbox();
+            });
         });
+        
+        // Handle select all checkbox
+        const selectAllCheckbox = document.getElementById('select-all-checkbox');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+                updateSelectedInfo();
+            });
+        }
+        
+        // Update select all checkbox state
+        function updateSelectAllCheckbox() {
+            const totalCheckboxes = document.querySelectorAll('.item-checkbox').length;
+            const checkedCheckboxes = document.querySelectorAll('.item-checkbox:checked').length;
+            
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = totalCheckboxes > 0 && totalCheckboxes === checkedCheckboxes;
+                selectAllCheckbox.indeterminate = checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes;
+            }
+        }
+        
+        // Initialize with a slight delay to ensure DOM is ready
+        setTimeout(function() {
+            updateSelectedInfo();
+        }, 100);
+    });
+    
+    // Proceed to checkout with selected items
+    // Function to show ARIA live alert
+    function showAriaAlert(message, redirect = null) {
+        let alertDiv = document.getElementById('aria-alert');
+        if (!alertDiv) {
+            alertDiv = document.createElement('div');
+            alertDiv.id = 'aria-alert';
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.setAttribute('aria-live', 'assertive');
+            alertDiv.setAttribute('aria-atomic', 'true');
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '30px';
+            alertDiv.style.right = '30px';
+            alertDiv.style.backgroundColor = '#fff3cd';
+            alertDiv.style.color = '#856404';
+            alertDiv.style.padding = '16px 24px';
+            alertDiv.style.borderRadius = '8px';
+            alertDiv.style.border = '2px solid #ffc107';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.minWidth = '350px';
+            alertDiv.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            alertDiv.style.fontWeight = '500';
+            alertDiv.style.fontSize = '14px';
+            alertDiv.style.fontFamily = 'Arial, sans-serif';
+            alertDiv.style.lineHeight = '1.5';
+            alertDiv.style.animation = 'slideIn 0.3s ease-out';
+            document.body.appendChild(alertDiv);
+        }
+        alertDiv.textContent = message;
+        alertDiv.style.display = 'block';
+        
+        // Add animation styles
+        if (!document.getElementById('alert-styles')) {
+            const style = document.createElement('style');
+            style.id = 'alert-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+                #aria-alert {
+                    transition: all 0.3s ease-out;
+                }
+                #aria-alert.hide {
+                    animation: slideOut 0.3s ease-out;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        if (redirect) {
+            setTimeout(() => {
+                alertDiv.classList.add('hide');
+                setTimeout(() => {
+                    window.location.href = redirect;
+                }, 300);
+            }, 2000);
+        } else {
+            setTimeout(() => {
+                alertDiv.classList.add('hide');
+                setTimeout(() => {
+                    alertDiv.style.display = 'none';
+                    alertDiv.classList.remove('hide');
+                }, 300);
+            }, 3000);
+        }
+    }
 
-        // Handle page refresh after removing items
-        $(window).on('beforeunload', function() {
-            // Reload to sync cart state
-            return undefined;
-        });
+    function proceedToCheckout() {
+        // Check if user is logged in
+        const isLoggedIn = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
+        
+        if (!isLoggedIn) {
+            showAriaAlert('Please create an account or login first to proceed to checkout.', 'user/register.php');
+            return;
+        }
+        
+        const selectedCheckboxes = document.querySelectorAll('.item-checkbox:checked');
+        
+        if (selectedCheckboxes.length === 0) {
+            showAriaAlert('Please select at least one item to checkout.');
+            return;
+        }
+        
+        // Store selected indices
+        const selectedIndices = Array.from(selectedCheckboxes).map(cb => cb.getAttribute('data-index'));
+        
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'pages/checkout.php';  // Point to pages/checkout.php, not root checkout.php
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'selected_items';
+        input.value = JSON.stringify(selectedIndices);
+        
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+    
+    // Function to check if cart is empty
+    function isCartEmpty() {
+        // Check session variable in PHP
+        var cartEmpty = <?php echo json_encode($cartEmpty); ?>;
+        return cartEmpty;
+    }
+
+    // Disable checkout button if cart is empty
+    function updateCheckoutButton() {
+        var $checkoutBtn = $('.checkout');
+        var isEmpty = isCartEmpty();
+        
+        if (isEmpty) {
+            $checkoutBtn.prop('disabled', true)
+                .css({
+                    'opacity': '0.5',
+                    'cursor': 'not-allowed',
+                    'pointer-events': 'none'
+                })
+                .attr('title', 'Your cart is empty. Please add items to checkout.');
+            
+            // Prevent any checkout attempts
+            $checkoutBtn.on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Show alert
+                alert('Your cart is empty! Please add items before checking out.');
+                return false;
+            });
+        }
+    }
+
+    // Initialize on page load
+    updateCheckoutButton();
+
+    // Monitor cart changes
+    $(document).on('change', '.quantity-input, #qty-input', function() {
+        setTimeout(updateCheckoutButton, 500);
+    });
+
+    // Handle page refresh after removing items
+    $(window).on('beforeunload', function() {
+        // Reload to sync cart state
+        return undefined;
     });
     </script>
 

@@ -16,6 +16,13 @@ if (isset($_SESSION['user_id'])) {
     $conn = new mysqli("localhost", "root", "", "smartsolutions");
     
     if (!$conn->connect_error) {
+        // Auto-initialize stock column if missing
+        $check_stock = $conn->query("SHOW COLUMNS FROM products LIKE 'stock'");
+        if (!$check_stock || $check_stock->num_rows == 0) {
+            $conn->query("ALTER TABLE products ADD COLUMN stock INT DEFAULT 10 NOT NULL");
+            $conn->query("UPDATE products SET stock = 10");
+        }
+        
         // Create table if doesn't exist
         $conn->query("CREATE TABLE IF NOT EXISTS `shopping_cart` (
           `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,

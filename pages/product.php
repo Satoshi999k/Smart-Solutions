@@ -1,13 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="../css/design.css" />
-<link rel="stylesheet" href="../css/animations.css" />
-<title>PRODUCTS - SMARTSOLUTIONS</title>
-</head>
-<body>
 <?php
 // Start session to check if the user is logged in
 session_start();
@@ -40,6 +30,198 @@ if (isset($_SESSION['user_id'])) {
 }
 $conn->close();
 ?>
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../css/design.css" />
+<link rel="stylesheet" href="../css/animations.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+<title>PRODUCTS - SMARTSOLUTIONS</title>
+<style>
+    body {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%) !important;
+    }
+
+    .breadcrumb {
+        padding: 16px 24px;
+        font-size: 14px;
+        color: #555;
+        background: transparent;
+    }
+
+    .breadcrumb a {
+        color: #0062F6;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .breadcrumb a:hover {
+        color: #0052D4;
+    }
+
+    .product-category {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+        padding: 40px 24px;
+        min-height: 100vh;
+    }
+
+    .product-category h1 {
+        text-align: center;
+        font-size: 36px;
+        color: #0062F6;
+        margin-bottom: 40px;
+        font-weight: 700;
+        animation: slideInDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        letter-spacing: 1px;
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .product-item {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+        border: 2px solid #e8f1ff;
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 4px 16px rgba(0, 98, 246, 0.08);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out forwards;
+        opacity: 0;
+    }
+
+    .product-item:nth-child(1) { animation-delay: 0.1s; }
+    .product-item:nth-child(2) { animation-delay: 0.2s; }
+    .product-item:nth-child(3) { animation-delay: 0.3s; }
+    .product-item:nth-child(4) { animation-delay: 0.4s; }
+    .product-item:nth-child(5) { animation-delay: 0.5s; }
+    .product-item:nth-child(6) { animation-delay: 0.6s; }
+    .product-item:nth-child(7) { animation-delay: 0.7s; }
+    .product-item:nth-child(8) { animation-delay: 0.8s; }
+    .product-item:nth-child(9) { animation-delay: 0.9s; }
+    .product-item:nth-child(10) { animation-delay: 1s; }
+    .product-item:nth-child(11) { animation-delay: 1.1s; }
+    .product-item:nth-child(12) { animation-delay: 1.2s; }
+
+    .product-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 98, 246, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .product-item:hover::before {
+        left: 100%;
+    }
+
+    .product-item:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 12px 40px rgba(0, 98, 246, 0.2);
+        border-color: #0062F6;
+        background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
+    }
+
+    .product-item img {
+        max-width: 100%;
+        height: 160px;
+        object-fit: contain;
+        transition: all 0.4s ease;
+        filter: drop-shadow(0 2px 8px rgba(0, 98, 246, 0.15));
+    }
+
+    .product-item:hover img {
+        filter: drop-shadow(0 8px 20px rgba(0, 98, 246, 0.3));
+        transform: scale(1.1);
+    }
+
+    .product-item a {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .product-category h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .product-grid {
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .product-item {
+            padding: 16px;
+        }
+
+        .product-item img {
+            height: 120px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .product-category {
+            padding: 24px 16px;
+        }
+
+        .product-category h1 {
+            font-size: 24px;
+            margin-bottom: 24px;
+        }
+
+        .product-grid {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .product-item {
+            padding: 12px;
+        }
+
+        .product-item img {
+            height: 100px;
+        }
+    }
+</style>
+</head>
+<body>
 <header>
     <div class="ssheader">
         <div class="logo">
@@ -103,9 +285,9 @@ $conn->close();
             </a>
             <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="profile.php">View Profile</a>
-                    <a href="edit-profile.php">Edit Profile</a>
-                    <a href="logout.php">Log Out</a>
+                    <a href="../user/profile.php">View Profile</a>
+                    <a href="../user/edit-profile.php">Edit Profile</a>
+                    <a href="../user/logout.php">Log Out</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -127,8 +309,8 @@ $conn->close();
     </div>
 
     <div class="breadcrumb">
-            <a href="../index.php">Home</a> > 
-            <a>Product Category</a>
+            <a href="../index.php"><i class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">home</i>Home</a> > 
+            <a><i class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">category</i>Product Category</a>
     </div>
     <div class="product-category">
         <h1>PRODUCT CATEGORY</h1>

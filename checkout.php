@@ -1,12 +1,31 @@
 <?php
 session_start();
 
-// Define the products array (This MUST be here BEFORE $productsById)
-$products = [
-    ["id" => 1, "name" => "Core i7 12700 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 25195.00, "image" => "image/desktop1.png"],
-    ["id" => 2, "name" => "Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 14795.00, "image" => "image/desktop2.png"],
-    ["id" => 3, "name" => "MSI Thin A15 B7UCX-084PH 15.6 / FHD 144Hz AMD RYZEN 5 7535HS/8GB/512GBSSD/RTX 2050 4GB/WIN11 Laptop", "price" => 38995.00, "image" => "image/laptop1.png"],
-    ["id" => 4, "name" => "Lenovo V15 G4 IRU 15.6 / FHD Intel Core i5- 1335U/8GB DDR4/512GB M.2 SSD Laptop MN", "price" => 29495.00, "image" => "image/laptop2.png"],
+// Database connection
+$conn = new mysqli("localhost", "root", "", "smartsolutions");
+
+// Fetch products from database instead of hardcoded array
+$products = [];
+$query = "SELECT id, name, price, image FROM products";
+$result = $conn->query($query);
+
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        // Handle image path - if relative, prepend /ITP122/
+        if (!empty($row['image']) && strpos($row['image'], '/') !== 0 && strpos($row['image'], 'http') !== 0) {
+            $row['image'] = '/ITP122/' . $row['image'];
+        }
+        $products[] = $row;
+    }
+}
+
+// Fallback: Empty array if no products (previously hardcoded array)
+if (empty($products)) {
+    $products = [
+    ["id" => 1, "name" => "Core i7 12700 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 25195.00, "image" => "image/Core_i7.png"],
+    ["id" => 2, "name" => "Core i3 12100 / H610 / 8GB DDR4 / 256GB SSD / PC Case M-ATX with 700W", "price" => 14795.00, "image" => "image/Core_i3.png"],
+    ["id" => 3, "name" => "MSI Thin A15 B7UCX-084PH 15.6 / FHD 144Hz AMD RYZEN 5 7535HS/8GB/512GBSSD/RTX 2050 4GB/WIN11 Laptop", "price" => 38995.00, "image" => "image/msithin.png"],
+    ["id" => 4, "name" => "Lenovo V15 G4 IRU 15.6 / FHD Intel Core i5- 1335U/8GB DDR4/512GB M.2 SSD Laptop MN", "price" => 29495.00, "image" => "image/ideapad.png"],
     ["id" => 5, "name" => "Team Elite Vulcan TUF 16gb 2x8 3200mhz Ddr4 Gaming Memory", "price" => 1999.00, "image" => "image/deal1.png"],
     ["id" => 6, "name" => "Team Elite Plus 8gb 1x8 3200Mhz Black Gold Ddr4 Memory", "price" => 1045.00, "image" => "image/deal2.png"],
     ["id" => 7, "name" => "G.Skill Ripjaws V 16gb 2x8 3200mhz Ddr4 Memory Black", "price" => 2185.00, "image" => "image/deal3.png"],
@@ -165,15 +184,37 @@ $products = [
   ["id" => 160, "name" => "Edifier W800BT Plus Black, Red & White Built-in microphone 8.0 noise cancellation Bluetooth v5.1 Stereo Headphones 19GLO", "price" => 1345.00, "image" => "image/edifier.png"],
   ["id" => 161, "name" => "Kingston KVR32S22S8/16 16gb 1x16 3200mhz Low-power auto self-refresh Ddr4 Sodimm Memory", "price" => 3350.00, "image" => "image/kingston.png"],
   ["id" => 162, "name" => "AMD Ryzen 7 5700G Socket Am4 3.8GHz with Radeon Vega 8 Processor", "price" => 11195.00, "image" => "image/ryzen7.png"],
-];
+    ];
+}
 
 $productsById = [];
 foreach ($products as $product) {
     $productsById[$product['id']] = $product;
 }
 
+// Handle selected items from cart
+$selectedIndices = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['selected_items'])) {
+    $selectedIndices = json_decode($_POST['selected_items'], true);
+    if (!is_array($selectedIndices)) {
+        $selectedIndices = [];
+    }
+}
+
 // Retrieve cart data from session
 $cart = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
+
+// Filter cart to only selected items (if selection was made)
+if (!empty($selectedIndices)) {
+    $filteredCart = [];
+    foreach ($selectedIndices as $index) {
+        if (isset($cart[$index])) {
+            $filteredCart[] = $cart[$index];
+        }
+    }
+    $cart = $filteredCart;
+}
+
 $cartItems = '';
 $totalPrice = 0;
 
@@ -184,7 +225,8 @@ if (!empty($cart)) {
             $product = $productsById[$item['id']] ?? null;
 
             if ($product !== null) {
-                $totalPrice += $product['price']; // Add product price to total
+                $itemQuantity = $item['quantity'] ?? 1;
+                $totalPrice += $product['price'] * $itemQuantity;
 
                 // Build the cart item HTML
                 $cartItems .= "
@@ -192,7 +234,8 @@ if (!empty($cart)) {
                     <img src='" . htmlspecialchars($product['image']) . "' alt='" . htmlspecialchars($product['name']) . "'>
                     <div>
                         <p>" . htmlspecialchars($product['name']) . "</p>
-                        <p>₱" . number_format($product['price'], 2) . "</p>
+                        <p>Quantity: " . $itemQuantity . "</p>
+                        <p>₱" . number_format($product['price'], 2) . " x " . $itemQuantity . " = ₱" . number_format($product['price'] * $itemQuantity, 2) . "</p>
                     </div>
                 </div>";
             } else {

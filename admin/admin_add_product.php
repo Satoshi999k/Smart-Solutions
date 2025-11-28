@@ -28,41 +28,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $category = $conn->real_escape_string($_POST['category']);
     $description = $conn->real_escape_string($_POST['description']);
     $image = 'image/default-product.png'; // Default image
+    $upload_error = false;
     
     // Validate required fields
-    if (empty($name) || empty($price)) {
-        $error = "Product name and price are required!";
+    if (empty($name) || empty($price) || empty($category)) {
+        $error = "Product name, price, and category are required!";
     } else {
         // Handle image upload
         if (!empty($_FILES['image']['name'])) {
             $target_dir = "../image/";
-            if (!is_dir($target_dir)) {
-                mkdir($target_dir, 0777, true);
-            }
-            $file_name = basename($_FILES['image']['name']);
-            $target_file = $target_dir . time() . '_' . $file_name; // Add timestamp to avoid conflicts
-            $file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
             
-            // Validate file type
-            $allowed_types = array('jpg', 'jpeg', 'png', 'gif');
-            if (in_array($file_type, $allowed_types)) {
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
-                    $image = $target_file;
+            // Check for upload errors
+            if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+                $upload_errors = array(
+                    UPLOAD_ERR_INI_SIZE => "File exceeds upload_max_filesize",
+                    UPLOAD_ERR_FORM_SIZE => "File exceeds form MAX_FILE_SIZE",
+                    UPLOAD_ERR_PARTIAL => "File was only partially uploaded",
+                    UPLOAD_ERR_NO_FILE => "No file was uploaded",
+                    UPLOAD_ERR_NO_TMP_DIR => "Missing temporary folder",
+                    UPLOAD_ERR_CANT_WRITE => "Failed to write file to disk",
+                    UPLOAD_ERR_EXTENSION => "File upload stopped by extension"
+                );
+                $error_msg = isset($upload_errors[$_FILES['image']['error']]) 
+                    ? $upload_errors[$_FILES['image']['error']] 
+                    : "Unknown upload error";
+                $error = "Upload failed: " . $error_msg;
+                $upload_error = true;
+            }
+            else {
+                // Check if directory exists, create if not
+                if (!is_dir($target_dir)) {
+                    if (!mkdir($target_dir, 0755, true)) {
+                        $error = "Failed to create image directory.";
+                        $upload_error = true;
+                    }
                 }
-            } else {
-                $error = "Invalid file type. Allowed: JPG, JPEG, PNG, GIF";
+                
+                if (!$upload_error) {
+                    $file_name = basename($_FILES['image']['name']);
+                    $unique_filename = time() . '_' . $file_name;
+                    $target_file = $target_dir . $unique_filename;
+                    $file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+                    
+                    // Validate file type
+                    if (!in_array($file_type, array('jpg', 'jpeg', 'png', 'gif'))) {
+                        $error = "Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.";
+                        $upload_error = true;
+                    }
+                    // Check file size (max 5MB)
+                    else if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
+                        $error = "File is too large. Maximum size is 5MB.";
+                        $upload_error = true;
+                    }
+                    else if (!is_writable($target_dir)) {
+                        $error = "Image directory is not writable. Check folder permissions.";
+                        $upload_error = true;
+                    }
+                    else if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                        $image = 'image/' . $unique_filename;
+                    } else {
+                        $error = "Failed to move uploaded file. Try again.";
+                        $upload_error = true;
+                    }
+                }
             }
         }
         
         // Insert new product if no errors
-        if (empty($error)) {
+        if (empty($error) && !$upload_error) {
             $insert_query = "INSERT INTO products (name, price, stock, category, description, image) 
                             VALUES ('$name', $price, $stock, '$category', '$description', '$image')";
             
             if ($conn->query($insert_query) === TRUE) {
                 $success = "Product added successfully!";
                 $_SESSION['success'] = $success;
-                header("Location: products.php");
+                header("Location: admin_products.php");
                 $conn->close();
                 exit();
             } else {
@@ -221,6 +261,15 @@ $conn->close();
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
             border-left: 4px solid #4CAF50;
         }
     </style>
@@ -240,8 +289,8 @@ $conn->close();
         <form method="POST" enctype="multipart/form-data" id="addProductForm">
             <div class="form-group">
                 <label for="image">Product Image</label>
-                <input type="file" id="image" name="image" accept="../image/*" onchange="previewImage(event)">
-                <p style="color: #999; font-size: 12px; margin-top: 5px;">Accepted: JPG, JPEG, PNG, GIF</p>
+                <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif,image/jpg" onchange="previewImage(event)">
+                <p style="color: #999; font-size: 12px; margin-top: 5px;">Accepted: JPG, JPEG, PNG, GIF (Max 5MB)</p>
             </div>
             
             <div id="imagePreview" class="image-preview">
