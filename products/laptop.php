@@ -62,7 +62,7 @@ if ($result && $result->num_rows > 0) {
 }
 
 // Get user profile picture
-$profile_picture = "image/login-icon.png"; 
+$profile_picture = "/ITP122/image/login-icon.png"; 
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
     $query = "SELECT profile_picture FROM users WHERE id = ?";
@@ -73,12 +73,14 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            // Check if it's a full URL (Google image, etc.) or relative path
+            // Check if it's a full URL (Google image, etc.) or absolute path
             if (strpos($row['profile_picture'], 'http') === 0) {
-                $profile_picture = $row['profile_picture']; // Use URL as-is
+                $profile_picture = $row['profile_picture']; // Use URL as-is (Google/external)
+            } elseif (strpos($row['profile_picture'], '/') === 0) {
+                $profile_picture = $row['profile_picture']; // Absolute path, use as-is
             } else {
-                // Use relative path
-                $profile_picture = $row['profile_picture']; 
+                // Relative path, add /ITP122/ prefix
+                $profile_picture = '/ITP122/' . $row['profile_picture'];
             }
         }
     }
