@@ -31,7 +31,11 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            $profile_picture = "../" . $row['profile_picture']; 
+            if (strpos($row['profile_picture'], 'http') === 0) {
+                $profile_picture = $row['profile_picture']; // Google/external URL
+            } else {
+                $profile_picture = "../" . $row['profile_picture']; // Local path with prefix
+            }
         }
     }
     $stmt->close();
@@ -60,10 +64,16 @@ $conn->close();
             font-weight: 800;
             text-align: center;
             margin: 50px 0 20px;
-            color: #1a1a1a;
+            color: #0062F6;
             letter-spacing: -1.5px;
             animation: slideInDown 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .processor-section h2:hover {
+            color: #004FCC;
+            transform: translateY(-2px);
         }
 
         .processor-section {
@@ -327,6 +337,15 @@ $conn->close();
             .processor-section h2 {
                 font-size: 32px;
                 margin: 40px 20px 20px;
+                color: #0062F6;
+                font-weight: 700;
+                letter-spacing: 1px;
+                transition: all 0.3s ease;
+            }
+
+            .processor-section h2:hover {
+                color: #004FCC;
+                transform: translateY(-2px);
             }
 
             .store-section {
@@ -438,9 +457,63 @@ $conn->close();
                 justify-content: center;
                 box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
             }
+
+            .profile-dropdown {
+                position: relative;
+                display: inline-block;
+            }
+
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                top: 110%;
+                right: 0;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+                border: 1px solid #e0e0e0;
+                min-width: 200px;
+                z-index: 1000;
+            }
+
+            .dropdown-content a {
+                display: flex;
+                align-items: center;
+                padding: 12px 16px;
+                color: #333;
+                font-size: 14px;
+                font-weight: 500;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .dropdown-content a:hover {
+                background: #f5f5f5;
+                color: #0062F6;
+                border-left-color: #0062F6;
+            }
+
+            .profile-dropdown.active .dropdown-content {
+                display: block;
+            }
+
+            .material-icons {
+                font-family: 'Material Icons';
+                font-weight: normal;
+                font-style: normal;
+                font-size: 24px;
+                display: inline-block;
+                line-height: 1;
+                text-transform: none;
+                letter-spacing: normal;
+                word-wrap: normal;
+                white-space: nowrap;
+                direction: ltr;
+            }
         </style>
         <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
                     alt="login-icon" 
@@ -450,9 +523,18 @@ $conn->close();
             </a>
             <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="../user/profile.php">View Profile</a>
-                    <a href="../user/edit-profile.php">Edit Profile</a>
-                    <a href="../user/logout.php">Log Out</a>
+                    <a href="../user/profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">person</i>
+                        View Profile
+                    </a>
+                    <a href="../user/edit-profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">edit</i>
+                        Edit Profile
+                    </a>
+                    <a href="../user/logout.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">logout</i>
+                        Log Out
+                    </a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -575,19 +657,25 @@ $conn->close();
     </div>
     <script>
     // Add JavaScript to toggle dropdown visibility
-    function toggleDropdown() {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        // Toggle the visibility of the dropdown menu
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    function toggleDropdown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        profileDropdown.classList.toggle('active');
     }
 
-    // Close the dropdown if the user clicks anywhere outside of it
-    window.onclick = function(event) {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-            dropdownMenu.style.display = 'none';
+    document.addEventListener('click', function(event) {
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (!profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('active');
         }
-    };
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.querySelector('.profile-dropdown').classList.remove('active');
+        }
+    });
 </script>
 <script src="js/search.js"></script>
 <script src="../js/jquery-animations.js"></script>

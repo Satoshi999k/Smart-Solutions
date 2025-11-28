@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="../css/design.css" />
 <link rel="stylesheet" href="../css/animations.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 <title>PAYMENT FAQ - SMART SOLUTIONS</title>
 </head>
 <?php
@@ -40,7 +41,11 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            $profile_picture = "../" . $row['profile_picture'];
+            if (strpos($row['profile_picture'], 'http') === 0) {
+                $profile_picture = $row['profile_picture']; // Google/external URL
+            } else {
+                $profile_picture = "../" . $row['profile_picture']; // Local path with prefix
+            }
         }
     }
     $stmt->close();
@@ -115,10 +120,166 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
                 justify-content: center;
                 box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
             }
+
+            .profile-dropdown {
+                position: relative;
+                display: inline-block;
+            }
+
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                top: 110%;
+                right: 0;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+                border: 1px solid #e0e0e0;
+                min-width: 200px;
+                z-index: 1000;
+            }
+
+            .dropdown-content a {
+                display: flex;
+                align-items: center;
+                padding: 12px 16px;
+                color: #333;
+                font-size: 14px;
+                font-weight: 500;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .dropdown-content a:hover {
+                background: #f5f5f5;
+                color: #0062F6;
+                border-left-color: #0062F6;
+            }
+
+            .profile-dropdown.active .dropdown-content {
+                display: block;
+            }
+
+            .material-icons {
+                font-family: 'Material Icons';
+                font-weight: normal;
+                font-style: normal;
+                font-size: 24px;
+                display: inline-block;
+                line-height: 1;
+                text-transform: none;
+                letter-spacing: normal;
+                word-wrap: normal;
+                white-space: nowrap;
+                direction: ltr;
+            }
+
+            .breadcrumb1 { padding: 16px 24px; font-size: 14px; color: #555; background: transparent; }
+            .breadcrumb1 a { color: #0062F6; text-decoration: none; font-weight: 500; transition: color 0.3s ease; }
+            .breadcrumb1 a:hover { color: #0052D4; }
+
+            .product-category {
+                text-align: center;
+                padding: 30px 40px;
+            }
+
+            .product-category h1 {
+                font-size: 36px;
+                font-weight: 700;
+                color: #0062F6;
+                margin: 0;
+                letter-spacing: 1px;
+                transition: all 0.3s ease;
+            }
+
+            .product-category h1:hover {
+                color: #004FCC;
+                transform: translateY(-2px);
+            }
+
+            .processor-sectionpay {
+                max-width: 1000px;
+                margin: 40px auto;
+                padding: 40px;
+                background: linear-gradient(135deg, #f8f9ff 0%, #f0f5ff 100%);
+                border-radius: 12px;
+                border-left: 6px solid #0062F6;
+                box-shadow: 0 4px 20px rgba(0, 98, 246, 0.08);
+                transition: all 0.3s ease;
+            }
+
+            .processor-sectionpay:hover {
+                box-shadow: 0 8px 30px rgba(0, 98, 246, 0.15);
+                transform: translateY(-2px);
+            }
+
+            .processor-sectionpay h4 {
+                color: #0062F6;
+                font-size: 18px;
+                font-weight: 600;
+                margin: 24px 0 12px 0;
+                transition: all 0.3s ease;
+            }
+
+            .processor-sectionpay h4:hover {
+                color: #004FCC;
+                transform: translateX(4px);
+            }
+
+            .processor-sectionpay p {
+                color: #333;
+                font-size: 15px;
+                line-height: 1.8;
+                font-weight: 500;
+                margin: 12px 0;
+                transition: all 0.3s ease;
+            }
+
+            .processor-sectionpay p:hover {
+                color: #0062F6;
+                transform: translateX(6px);
+            }
+
+            .processor-sectionpay i {
+                color: #666;
+                font-size: 14px;
+                line-height: 1.8;
+                display: block;
+                margin: 8px 0;
+                font-style: italic;
+                transition: all 0.3s ease;
+            }
+
+            .processor-sectionpay i:hover {
+                color: #0062F6;
+                transform: translateX(8px);
+            }
+
+            .important-note {
+                background: linear-gradient(135deg, rgba(0, 98, 246, 0.1) 0%, rgba(0, 98, 246, 0.05) 100%);
+                border-left: 4px solid #0062F6;
+                padding: 16px 20px;
+                border-radius: 8px;
+                margin: 24px 0;
+                font-size: 14px;
+                color: #333;
+                transition: all 0.3s ease;
+            }
+
+            .important-note:hover {
+                box-shadow: 0 4px 12px rgba(0, 98, 246, 0.15);
+                transform: translateY(-2px);
+            }
+
+            .important-note strong {
+                color: #0062F6;
+                font-weight: 600;
+            }
         </style>
         
        <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
                     alt="login-icon" 
@@ -128,9 +289,18 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
             </a>
             <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="../user/profile.php">View Profile</a>
-                    <a href="../user/edit-profile.php">Edit Profile</a>
-                    <a href="../user/logout.php">Log Out</a>
+                    <a href="../user/profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">person</i>
+                        View Profile
+                    </a>
+                    <a href="../user/edit-profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">edit</i>
+                        Edit Profile
+                    </a>
+                    <a href="../user/logout.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">logout</i>
+                        Log Out
+                    </a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -153,8 +323,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
     </div>
 
     <div class="breadcrumb1">
-            <a href="../index.php">Home</a> > 
-            <a>Payment FAQ</a>
+            <a href="../index.php"><span class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px;">home</span>Home</a> > <span class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px; color: #0062F6;">help</span><a>Payment FAQ</a>
     </div>
 
      <div class="product-category">
@@ -246,19 +415,25 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
 </div>
 <script>
     // Add JavaScript to toggle dropdown visibility
-    function toggleDropdown() {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        // Toggle the visibility of the dropdown menu
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    function toggleDropdown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        profileDropdown.classList.toggle('active');
     }
 
-    // Close the dropdown if the user clicks anywhere outside of it
-    window.onclick = function(event) {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-            dropdownMenu.style.display = 'none';
+    document.addEventListener('click', function(event) {
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (!profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('active');
         }
-    };
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.querySelector('.profile-dropdown').classList.remove('active');
+        }
+    });
 </script>
 <script src="js/search.js"></script>
 <script src="../js/jquery-animations.js"></script>

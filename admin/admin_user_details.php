@@ -12,7 +12,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
 
 // Check if user ID is provided
 if (!isset($_GET['id'])) {
-    header("Location: users.php");
+    header("Location: admin_users.php");
     exit();
 }
 
@@ -30,7 +30,7 @@ $check_result = $conn->query("SELECT * FROM users WHERE id = $user_id");
 
 if ($check_result->num_rows == 0) {
     $_SESSION['error'] = "User not found!";
-    header("Location: users.php");
+    header("Location: admin_users.php");
     $conn->close();
     exit();
 }
@@ -49,6 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($_FILES['profile_picture']['name'])) {
         $target_dir = "../image/";
         $file_name = basename($_FILES['profile_picture']['name']);
+        // Add timestamp to avoid overwriting files with same name
+        $file_name = time() . "_" . $file_name;
         $target_file = $target_dir . $file_name;
         $file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
         
@@ -56,7 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $allowed_types = array('jpg', 'jpeg', 'png', 'gif');
         if (in_array($file_type, $allowed_types)) {
             if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $target_file)) {
-                $profile_picture = $target_file;
+                // Store relative path from root: image/filename.jpg
+                $profile_picture = "image/" . $file_name;
             }
         }
     }
@@ -73,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($conn->query($update_query) === TRUE) {
         $_SESSION['success'] = "User updated successfully!";
-        header("Location: users.php");
+        header("Location: admin_users.php");
         $conn->close();
         exit();
     } else {
@@ -271,16 +274,28 @@ $conn->close();
                 <?php 
                 $profile_pic = "../image/login-icon.png";
                 if (!empty($user['profile_picture'])) {
-                    $profile_pic = '/ITP122/' . $user['profile_picture'];
+                    // Check if it's a full URL (from OAuth like Google)
+                    if (strpos($user['profile_picture'], 'http://') === 0 || strpos($user['profile_picture'], 'https://') === 0) {
+                        $profile_pic = $user['profile_picture'];
+                    } elseif (strpos($user['profile_picture'], '/') === 0) {
+                        $profile_pic = $user['profile_picture'];
+                    } else {
+                        $profile_pic = '/ITP122/' . $user['profile_picture'];
+                    }
                 }
                 ?>
-                <img src="<?php echo $profile_pic; ?>" alt="<?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>">
+                <img src="<?php echo $profile_pic; ?>" alt="<?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>" style="max-width: 200px; max-height: 200px; border-radius: 8px; object-fit: cover;">
+            </div>
+            <?php else: ?>
+            <div class="image-preview">
+                <p><strong>Current Profile Picture:</strong></p>
+                <img src="../image/login-icon.png" alt="Default Profile" style="max-width: 200px; max-height: 200px; border-radius: 8px; object-fit: cover;">
             </div>
             <?php endif; ?>
             
             <div class="form-group">
                 <label for="profile_picture">Upload New Profile Picture</label>
-                <input type="file" id="profile_picture" name="profile_picture" accept="../image/*">
+                <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
                 <p style="color: #999; font-size: 12px; margin-top: 5px;">Accepted: JPG, JPEG, PNG, GIF</p>
             </div>
             

@@ -22,8 +22,13 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            // Add ../ prefix to profile picture path since we're in pages/ subfolder
-            $profile_picture = "../" . $row['profile_picture']; 
+            // Check if it's a full URL (Google image, etc.) or relative path
+            if (strpos($row['profile_picture'], 'http') === 0) {
+                $profile_picture = $row['profile_picture']; // Use URL as-is
+            } else {
+                // Add ../ prefix for relative paths since we're in pages/ subfolder
+                $profile_picture = "../" . $row['profile_picture']; 
+            }
         }
     }
     $stmt->close();
@@ -219,6 +224,13 @@ $conn->close();
             height: 100px;
         }
     }
+
+    /* Modern Dropdown Styling */
+    .profile-dropdown { position: relative; display: inline-block; }
+    .dropdown-content { display: none; position: absolute; top: 110%; right: 0; background: white; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); border: 1px solid #e0e0e0; min-width: 200px; z-index: 1000; }
+    .dropdown-content a { display: flex; align-items: center; padding: 12px 16px; color: #333; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s ease; border-left: 3px solid transparent; }
+    .dropdown-content a:hover { background: #f5f5f5; color: #0062F6; border-left-color: #0062F6; }
+    .profile-dropdown.active .dropdown-content { display: block; }
 </style>
 </head>
 <body>
@@ -275,7 +287,7 @@ $conn->close();
         </style>
 
        <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
                     alt="login-icon" 
@@ -285,9 +297,18 @@ $conn->close();
             </a>
             <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="../user/profile.php">View Profile</a>
-                    <a href="../user/edit-profile.php">Edit Profile</a>
-                    <a href="../user/logout.php">Log Out</a>
+                    <a href="../user/profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">person</i>
+                        View Profile
+                    </a>
+                    <a href="../user/edit-profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">edit</i>
+                        Edit Profile
+                    </a>
+                    <a href="../user/logout.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">logout</i>
+                        Log Out
+                    </a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -426,21 +447,31 @@ $conn->close();
         &copy; 2024 SmartSolutions. All rights reserved.
     </div>
     <script>
-        // Add JavaScript to toggle dropdown
-        function toggleDropdown() {
-            var profileDropdown = document.querySelector(".profile-dropdown");
-            profileDropdown.classList.toggle("active");
+        // Modern dropdown toggle with smooth transitions
+        function toggleDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
         }
 
-        // Close the dropdown if the user clicks anywhere outside of it
-        window.onclick = function(event) {
-            if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-                var dropdowns = document.querySelectorAll('.dropdown-content');
-                for (var i = 0; i < dropdowns.length; i++) {
-                    dropdowns[i].style.display = 'none';
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        // Close dropdown on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                if (profileDropdown) {
+                    profileDropdown.classList.remove('active');
                 }
             }
-        };
+        });
 </script>
 <script src="../js/search.js"></script>
 <script src="../js/header-animation.js"></script>

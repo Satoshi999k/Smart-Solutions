@@ -25,18 +25,13 @@ if (isset($_POST['upload_picture'])) {
         $filetype = pathinfo($filename, PATHINFO_EXTENSION);
         
         if (in_array(strtolower($filetype), $allowed)) {
-            $new_filename = 'profile_' . $user_id . '_' . time() . '.' . $filetype;
-            // Use relative path from root directory
-            $upload_path = '../uploads/' . $new_filename;
-            
-            // Create uploads directory if it doesn't exist
-            if (!file_exists('../uploads')) {
-                mkdir('../uploads', 0777, true);
-            }
+            $new_filename = time() . '_' . $filename;
+            // Use image directory like admin
+            $upload_path = '../image/' . $new_filename;
             
             if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $upload_path)) {
                 // Store path relative to root in database
-                $db_path = 'uploads/' . $new_filename;
+                $db_path = 'image/' . $new_filename;
                 $update_pic = "UPDATE users SET profile_picture = ? WHERE id = ?";
                 $stmt = $conn->prepare($update_pic);
                 $stmt->bind_param("si", $db_path, $user_id);
@@ -108,11 +103,17 @@ if (!$user) {
 $stmt->close();
 
 // Get profile picture - handle both uploaded and default profiles
-$profile_picture = 'image/default-profile.png';
+$profile_picture = '../image/default-profile.png';
 if (!empty($user['profile_picture'])) {
     $pic_path = $user['profile_picture'];
-    // If path starts with 'uploads/', prepend ../
-    if (strpos($pic_path, 'uploads/') === 0) {
+    // Check if it's a full URL (from OAuth like Google)
+    if (strpos($pic_path, 'http://') === 0 || strpos($pic_path, 'https://') === 0) {
+        $profile_picture = $pic_path;
+    } elseif (strpos($pic_path, 'image/') === 0) {
+        // If path starts with 'image/', prepend ../
+        $profile_picture = '../' . $pic_path;
+    } elseif (strpos($pic_path, 'uploads/') === 0) {
+        // Legacy uploads directory, prepend ../
         $profile_picture = '../' . $pic_path;
     } else {
         // If it's already a full path, use it
@@ -127,6 +128,7 @@ if (!empty($user['profile_picture'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/design.css" />
     <link rel="stylesheet" href="../css/animations.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <meta charset="UTF-8">
     <title>Edit Profile - SMARTSOLUTIONS</title>
     <style>
@@ -385,8 +387,25 @@ if (!empty($user['profile_picture'])) {
             }
         </style>
 
+        <!-- Modern Profile Dropdown CSS -->
+        <style>
+            .profile-dropdown { position: relative; display: inline-block; }
+            
+            .dropdown-content { display: none; position: absolute; top: 110%; right: 0; background: white; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); border: 1px solid #e0e0e0; min-width: 200px; z-index: 1000; }
+            
+            .dropdown-content a { display: flex; align-items: center; padding: 12px 16px; color: #333; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s ease; border-left: 3px solid transparent; }
+            
+            .dropdown-content a:hover { background: #f5f5f5; color: #0062F6; border-left-color: #0062F6; }
+            
+            .dropdown-content a .material-icons { font-size: 18px; margin-right: 12px; display: flex; align-items: center; }
+            
+            .profile-dropdown.active .dropdown-content { display: block; animation: slideDown 0.25s ease-out; }
+            
+            @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        </style>
+
        <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
                     alt="login-icon" 
@@ -394,19 +413,19 @@ if (!empty($user['profile_picture'])) {
                             width: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>; 
                             height: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>;">
             </a>
-            <div id="dropdown-menu" class="dropdown-content">
+            <div class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="profile.php">View Profile</a>
-                    <a href="edit-profile.php">Edit Profile</a>
-                    <a href="logout.php">Log Out</a>
+                    <a href="../user/profile.php"><span class="material-icons">person</span>View Profile</a>
+                    <a href="../user/edit-profile.php"><span class="material-icons">edit</span>Edit Profile</a>
+                    <a href="../user/logout.php"><span class="material-icons">logout</span>Log Out</a>
                 <?php endif; ?>
             </div>
         </div>
         <div class="login-text">
             <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="profile.php"></a>
+                <a href="../user/profile.php"></a>
             <?php else: ?>
-                <a href="register.php"><p>Login/<br>Sign In</p></a>
+                <a href="../user/register.php"><p>Login/<br>Sign In</p></a>
             <?php endif; ?>
         </div>
     </div>
@@ -499,21 +518,21 @@ if (!empty($user['profile_picture'])) {
     <div class="footer-col">
         <h3>Customer Service</h3>
         <ul>
-            <li><a href="paymentfaq.php">Payment FAQs</a></li>
-            <li><a href="ret&ref.php">Return and Refunds</a></li>
+            <li><a href="../pages/paymentfaq.php">Payment FAQs</a></li>
+            <li><a href="../pages/ret&ref.php">Return and Refunds</a></li>
         </ul>
     </div>
     <div class="footer-col">
         <h3>Company</h3>
         <ul>
-            <li><a href="about_us.php">About Us</a></li>
-            <li><a href="contact_us.php">Contact Us</a></li>
+            <li><a href="../pages/about_us.php">About Us</a></li>
+            <li><a href="../pages/contact_us.php">Contact Us</a></li>
         </ul>
     </div>
     <div class="footer-col">
         <h3>Links</h3>
         <ul>
-            <li><a href="corporate.php">SmartSolutions Corporate</a></li>
+            <li><a href="../pages/corporate.php">SmartSolutions Corporate</a></li>
             <li><a href="https://web.facebook.com/groups/1581265395842396" target="_blank">SmartSolutions Community</a></li>
         </ul>
     </div>
@@ -544,19 +563,31 @@ if (!empty($user['profile_picture'])) {
     </div>
 
     <script>
-        function toggleDropdown() {
-            var dropdown = document.getElementById("dropdown-menu");
-            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        // Modern dropdown toggle function
+        function toggleDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
         }
 
-        window.onclick = function(event) {
-            if (!event.target.matches('.login')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    dropdowns[i].style.display = "none";
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        // Close dropdown on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                if (profileDropdown) {
+                    profileDropdown.classList.remove('active');
                 }
             }
-        }
+        });
     </script>
 <script src="../js/search.js"></script>
 <script src="../js/header-animations.js"></script>

@@ -33,7 +33,14 @@ if (isset($_SESSION['user_id'])) {
     $profile_result = $profile_stmt->get_result();
     if ($profile_row = $profile_result->fetch_assoc()) {
         if (!empty($profile_row['profile_picture'])) {
-            $user_profile_picture = '/ITP122/' . $profile_row['profile_picture'];
+            // Check if it's a full URL (from OAuth like Google)
+            if (strpos($profile_row['profile_picture'], 'http://') === 0 || strpos($profile_row['profile_picture'], 'https://') === 0) {
+                $user_profile_picture = $profile_row['profile_picture'];
+            } elseif (strpos($profile_row['profile_picture'], '/') === 0) {
+                $user_profile_picture = $profile_row['profile_picture'];
+            } else {
+                $user_profile_picture = '/ITP122/' . $profile_row['profile_picture'];
+            }
         }
     }
     $profile_stmt->close();
@@ -506,7 +513,14 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT
                                 <?php 
                                 $profile_pic = "../image/login-icon.png";
                                 if (!empty($user['profile_picture'])) {
-                                    $profile_pic = '/ITP122/' . $user['profile_picture'];
+                                    // Check if it's a full URL (from OAuth like Google)
+                                    if (strpos($user['profile_picture'], 'http://') === 0 || strpos($user['profile_picture'], 'https://') === 0) {
+                                        $profile_pic = $user['profile_picture'];
+                                    } elseif (strpos($user['profile_picture'], '/') === 0) {
+                                        $profile_pic = $user['profile_picture'];
+                                    } else {
+                                        $profile_pic = '/ITP122/' . $user['profile_picture'];
+                                    }
                                 }
                                 ?>
                                 <img src="<?php echo $profile_pic; ?>" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">

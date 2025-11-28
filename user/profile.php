@@ -27,10 +27,14 @@ $stmt->close();
 // Get profile picture
 $profile_picture = '../image/login-icon.png'; // Default fallback
 if (!empty($user['profile_picture'])) {
-    // If the profile picture path doesn't start with /, add the /ITP122/ prefix
-    if (strpos($user['profile_picture'], '/') === 0) {
+    // Check if it's a full URL (from OAuth like Google)
+    if (strpos($user['profile_picture'], 'http://') === 0 || strpos($user['profile_picture'], 'https://') === 0) {
+        $profile_picture = $user['profile_picture'];
+    } elseif (strpos($user['profile_picture'], '/') === 0) {
+        // If the profile picture path starts with /, use it as is
         $profile_picture = $user['profile_picture'];
     } else {
+        // Otherwise prepend /ITP122/
         $profile_picture = '/ITP122/' . $user['profile_picture'];
     }
 }
@@ -449,7 +453,7 @@ $conn->close();
             </div>
         </a>
         <div class="track">
-            <a href="../track.php"><img class="track" src="../image/track-icon.png" alt="track-icon"></a>
+            <a href="../pages/track.php"><img class="track" src="../image/track-icon.png" alt="track-icon"></a>
         </div>
         <a href="../cart.php">
             <div class="cart">
@@ -484,8 +488,25 @@ $conn->close();
             }
         </style>
 
+        <!-- Modern Profile Dropdown CSS -->
+        <style>
+            .profile-dropdown { position: relative; display: inline-block; }
+            
+            .dropdown-content { display: none; position: absolute; top: 110%; right: 0; background: white; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); border: 1px solid #e0e0e0; min-width: 200px; z-index: 1000; }
+            
+            .dropdown-content a { display: flex; align-items: center; padding: 12px 16px; color: #333; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s ease; border-left: 3px solid transparent; }
+            
+            .dropdown-content a:hover { background: #f5f5f5; color: #0062F6; border-left-color: #0062F6; }
+            
+            .dropdown-content a .material-icons { font-size: 18px; margin-right: 12px; display: flex; align-items: center; }
+            
+            .profile-dropdown.active .dropdown-content { display: block; animation: slideDown 0.25s ease-out; }
+            
+            @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        </style>
+
        <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <!-- Check if user is logged in, if yes show profile picture, else show login icon -->
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
@@ -494,19 +515,19 @@ $conn->close();
                             width: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>; 
                             height: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>;">
             </a>
-            <div id="dropdown-menu" class="dropdown-content">
+            <div class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="profile.php">View Profile</a>
-                    <a href="edit-profile.php">Edit Profile</a>
-                    <a href="logout.php">Log Out</a>
+                    <a href="../user/profile.php"><span class="material-icons">person</span>View Profile</a>
+                    <a href="../user/edit-profile.php"><span class="material-icons">edit</span>Edit Profile</a>
+                    <a href="../user/logout.php"><span class="material-icons">logout</span>Log Out</a>
                     <?php endif; ?>
                 </div>
             </div>
             <div class="login-text">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="profile.php"></a>
+                    <a href="../user/profile.php"></a>
                 <?php else: ?>
-                    <a href="register.php"><p>Login/<br>Sign In</p></a>
+                    <a href="../user/register.php"><p>Login/<br>Sign In</p></a>
                 <?php endif; ?>
             </div>
     </div>
@@ -533,7 +554,7 @@ $conn->close();
                     <h2><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></h2>
                     <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
                     <p><strong>Member Since:</strong> <?php echo date('F Y', strtotime($user['created_at'] ?? 'now')); ?></p>
-                    <a href="edit-profile.php" class="profile-edit-btn">Edit Profile</a>
+                    <a href="../user/edit-profile.php" class="profile-edit-btn">Edit Profile</a>
                 </div>
             </div>
 
@@ -674,7 +695,7 @@ $conn->close();
                             <?php endif; ?>
                         <?php else: ?>
                             <div class="no-orders">
-                                <p>📦 You haven't placed any orders yet.</p>
+                                <p><i class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 24px;">local_shipping</i>You haven't placed any orders yet.</p>
                                 <a href="../product.php" class="profile-edit-btn" style="display: inline-block; margin-top: 15px;">Start Shopping</a>
                             </div>
                         <?php endif; ?>
@@ -733,19 +754,31 @@ $conn->close();
     </div>
 
     <script>
-        function toggleDropdown() {
-            var dropdown = document.getElementById("dropdown-menu");
-            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        // Modern dropdown toggle function
+        function toggleDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
         }
 
-        window.onclick = function(event) {
-            if (!event.target.matches('.login')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    dropdowns[i].style.display = "none";
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        // Close dropdown on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                if (profileDropdown) {
+                    profileDropdown.classList.remove('active');
                 }
             }
-        }
+        });
     </script>
     </script>
 <script src="js/search.js"></script>

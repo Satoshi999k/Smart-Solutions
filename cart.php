@@ -412,6 +412,7 @@ if (isset($_GET['remove'])) {
             background: linear-gradient(45deg, #007BFF 0%, #0056b3 25%, #003f87 50%, #0056b3 75%, #007BFF 100%);
             padding: 25px 30px;
             color: white;
+            text-align: center;
         }
         
         .cart-table-header h2 {
@@ -421,6 +422,7 @@ if (isset($_GET['remove'])) {
             display: flex;
             align-items: center;
             gap: 12px;
+            justify-content: center;
         }
         
         .cart-table-header i {
@@ -738,6 +740,66 @@ if (isset($_GET['remove'])) {
             font-size: 16px;
             margin-right: 4px;
         }
+        
+        /* Modern Profile Dropdown */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            border: 1px solid #e0e0e0;
+            min-width: 200px;
+            z-index: 1000;
+        }
+        
+        .dropdown-content a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .dropdown-content a:hover {
+            background: #f5f5f5;
+            color: #0062F6;
+            border-left-color: #0062F6;
+        }
+        
+        .dropdown-content a .material-icons {
+            font-size: 18px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .profile-dropdown.active .dropdown-content {
+            display: block;
+            animation: slideDown 0.25s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -792,7 +854,7 @@ if (isset($_GET['remove'])) {
         </style>
 
        <div class="login profile-dropdown">
-        <a href="javascript:void(0)" onclick="toggleDropdown()">
+        <a href="javascript:void(0)" onclick="toggleDropdown(event)">
             <img class="login" 
                  src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : 'image/login-icon.png'; ?>" 
                  alt="login-icon" 
@@ -800,13 +862,13 @@ if (isset($_GET['remove'])) {
                         width: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>; 
                         height: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>;">
         </a>
-        <div id="dropdown-menu" class="dropdown-content">
+        <div class="dropdown-content">
             <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="user/profile.php">View Profile</a>
-                <a href="user/edit-profile.php">Edit Profile</a>
-                <a href="user/logout.php">Log Out</a>
-                <?php endif; ?>
-            </div>
+                <a href="user/profile.php"><span class="material-icons">person</span>View Profile</a>
+                <a href="user/edit-profile.php"><span class="material-icons">edit</span>Edit Profile</a>
+                <a href="user/logout.php"><span class="material-icons">logout</span>Log Out</a>
+            <?php endif; ?>
+        </div>
         </div>
         <div class="login-text">
             <?php if (isset($_SESSION['user_id'])): ?>
@@ -976,21 +1038,31 @@ if (isset($_GET['remove'])) {
 </div>
 
 <script>
-        // Add JavaScript to toggle dropdown
-        function toggleDropdown() {
-            var profileDropdown = document.querySelector(".profile-dropdown");
-            profileDropdown.classList.toggle("active");
+        // Modern dropdown toggle function
+        function toggleDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
         }
 
-        // Close the dropdown if the user clicks anywhere outside of it
-        window.onclick = function(event) {
-            if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-                var dropdowns = document.querySelectorAll('.dropdown-content');
-                for (var i = 0; i < dropdowns.length; i++) {
-                    dropdowns[i].style.display = 'none';
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        // Close dropdown on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                if (profileDropdown) {
+                    profileDropdown.classList.remove('active');
                 }
             }
-        };
+        });
 
         // Function to update cart quantity
         function updateQuantity(itemIndex, action) {

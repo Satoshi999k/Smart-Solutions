@@ -29,7 +29,13 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            $profile_picture = "../" . $row['profile_picture']; // Use user's profile picture
+            // Check if it's a full URL (Google image, etc.) or relative path
+            if (strpos($row['profile_picture'], 'http') === 0) {
+                $profile_picture = $row['profile_picture']; // Use URL as-is
+            } else {
+                // Add ../ prefix for relative paths since we're in pages/ subfolder
+                $profile_picture = "../" . $row['profile_picture']; // Use user's profile picture
+            }
         }
     }
     $stmt->close();
@@ -60,7 +66,7 @@ $conn->close();
         </a>
         </div>
         <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <!-- Check if user is logged in, if yes show profile picture, else show login icon -->
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
@@ -71,8 +77,18 @@ $conn->close();
             </a>
             <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="edit-profile.php">Edit Profile</a>
-                    <a href="logout.php">Log Out</a>
+                    <a href="profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">person</i>
+                        View Profile
+                    </a>
+                    <a href="edit-profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">edit</i>
+                        Edit Profile
+                    </a>
+                    <a href="logout.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">logout</i>
+                        Log Out
+                    </a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -180,20 +196,31 @@ $conn->close();
     </div>
     <script>
         // Add JavaScript to toggle dropdown
-        function toggleDropdown() {
-            var profileDropdown = document.querySelector(".profile-dropdown");
-            profileDropdown.classList.toggle("active");
+        // Modern dropdown toggle with smooth transitions
+        function toggleDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            profileDropdown.classList.toggle('active');
         }
 
-        // Close the dropdown if the user clicks anywhere outside of it
-        window.onclick = function(event) {
-            if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-                var dropdowns = document.querySelectorAll('.dropdown-content');
-                for (var i = 0; i < dropdowns.length; i++) {
-                    dropdowns[i].style.display = 'none';
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        // Close dropdown on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                if (profileDropdown) {
+                    profileDropdown.classList.remove('active');
                 }
             }
-        };
+        });
 </script>
 <script src="js/search.js"></script>
 <script src="../js/jquery-animations.js"></script>

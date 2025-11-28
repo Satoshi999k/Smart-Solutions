@@ -110,6 +110,48 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
     .add-to-cart { background: white; border: 2px solid #0062F6; padding: 8px 12px; display: flex; align-items: center; justify-content: center; }
     .add-to-cart:hover { background: #f0f7ff; border-color: #0052D4; }
     .add-to-cart img { max-width: 20px; height: 20px; object-fit: contain; filter: none; margin: 0; }
+    /* Modern Dropdown Styles */
+    .profile-dropdown { position: relative; display: inline-block; }
+    .profile-dropdown > a { cursor: pointer; display: flex; align-items: center; }
+    .profile-dropdown img { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .profile-dropdown:hover img { transform: scale(1.1); }
+    .dropdown-content { 
+        display: none;
+        position: absolute; 
+        top: 110%; 
+        right: 0; 
+        background: white; 
+        border-radius: 8px; 
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); 
+        border: 1px solid #e0e0e0;
+        min-width: 200px; 
+        z-index: 1000;
+    }
+    .dropdown-content a { 
+        display: flex;
+        align-items: center;
+        padding: 12px 16px; 
+        color: #333; 
+        text-decoration: none; 
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+    }
+    .dropdown-content a:hover { 
+        background: #f5f5f5;
+        color: #0062F6; 
+        border-left-color: #0062F6;
+    }
+    .profile-dropdown.active .dropdown-content { 
+        display: block;
+    }
+    .dropdown-content a:first-child {
+        padding-top: 12px;
+    }
+    .dropdown-content a:last-child {
+        padding-bottom: 12px;
+    }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 768px) { .processor-section h2 { font-size: 28px; margin-bottom: 30px; } .product-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; padding: 20px 16px; } .product-card { padding: 16px; } .product-card img { height: 140px; } }
@@ -170,7 +212,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
         </style>
 
         <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
                     alt="login-icon" 
@@ -180,19 +222,37 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
             </a>
             <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="../user/profile.php">View Profile</a>
-                    <a href="../user/edit-profile.php">Edit Profile</a>
-                    <a href="../user/logout.php">Log Out</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <div class="login-text">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="../user/profile.php"></a>
+                    <a href="../user/profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">person</i>
+                        View Profile
+                    </a>
+                    <a href="../user/edit-profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">edit</i>
+                        Edit Profile
+                    </a>
+                    <a href="../user/logout.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">logout</i>
+                        Log Out
+                    </a>
                 <?php else: ?>
-                    <a href="../user/register.php"><p>Login/<br>Sign In</p></a>
+                    <a href="../user/register.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">login</i>
+                        Sign In
+                    </a>
+                    <a href="../user/register.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">person_add</i>
+                        Register
+                    </a>
                 <?php endif; ?>
             </div>
+        </div>
+        <div class="login-text">
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="../user/profile.php"></a>
+            <?php else: ?>
+                <a href="../user/register.php"><p>Login/<br>Sign In</p></a>
+            <?php endif; ?>
+        </div>
     </div>
     </header>
 
@@ -206,7 +266,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
 
 <div class="breadcrumb">
     <a href="../index.php"><i class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">home</i>Home</a> > 
-    <a><i class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">pointing_hand</i>Mouse</a>
+    <a><i class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">touch_app</i>Mouse</a>
 </div>
 
 <div class="processor-section">
@@ -292,20 +352,28 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
     </div>
 
 <script>
-    // Add JavaScript to toggle dropdown visibility
-    function toggleDropdown() {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        // Toggle the visibility of the dropdown menu
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    // Modern dropdown with smooth animations
+    function toggleDropdown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        profileDropdown.classList.toggle('active');
     }
 
-    // Close the dropdown if the user clicks anywhere outside of it
-    window.onclick = function(event) {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-            dropdownMenu.style.display = 'none';
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (!profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('active');
         }
-    };
+    });
+
+    // Close dropdown when pressing Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.querySelector('.profile-dropdown').classList.remove('active');
+        }
+    });
     
     // Handle buy now button
     document.addEventListener('click', function(e) {

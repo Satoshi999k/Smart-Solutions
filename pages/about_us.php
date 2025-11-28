@@ -31,7 +31,13 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            $profile_picture = "../" . $row['profile_picture']; // Use user's profile picture
+            // Check if it's a full URL (Google image, etc.) or relative path
+            if (strpos($row['profile_picture'], 'http') === 0) {
+                $profile_picture = $row['profile_picture']; // Use URL as-is
+            } else {
+                // Add ../ prefix for relative paths since we're in pages/ subfolder
+                $profile_picture = "../" . $row['profile_picture']; // Use user's profile picture
+            }
         }
     }
     $stmt->close();
@@ -69,9 +75,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
     <style>
         * { box-sizing: border-box; }
         body { background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%) !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .breadcrumb { padding: 18px 32px; font-size: 14px; color: #666; background: transparent; }
-        .breadcrumb a { color: #0062F6; text-decoration: none; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; }
-        .breadcrumb a:hover { color: #0052D4; transform: translateX(4px); }
+        .breadcrumb { padding: 16px 24px; font-size: 14px; color: #555; background: transparent; display: flex; align-items: center; }
+        .breadcrumb a { color: #0062F6; text-decoration: none; font-weight: 500; transition: color 0.3s ease; display: inline-flex; align-items: center; }
+        .breadcrumb a:hover { color: #0052D4; }
         .about-intro { background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%); color: #0062F6; padding: 100px 40px; text-align: center; animation: slideInDown 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; }
         .about-intro::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #0062F6 0%, #0052D4 50%, #00a8ff 100%); }
         .about-intro::after { content: ''; position: absolute; bottom: 0; right: -20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 98, 246, 0.06) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
@@ -169,9 +175,63 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
                 justify-content: center;
                 box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
             }
+
+            .profile-dropdown {
+                position: relative;
+                display: inline-block;
+            }
+
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                top: 110%;
+                right: 0;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+                border: 1px solid #e0e0e0;
+                min-width: 200px;
+                z-index: 1000;
+            }
+
+            .dropdown-content a {
+                display: flex;
+                align-items: center;
+                padding: 12px 16px;
+                color: #333;
+                font-size: 14px;
+                font-weight: 500;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .dropdown-content a:hover {
+                background: #f5f5f5;
+                color: #0062F6;
+                border-left-color: #0062F6;
+            }
+
+            .profile-dropdown.active .dropdown-content {
+                display: block;
+            }
+
+            .material-icons {
+                font-family: 'Material Icons';
+                font-weight: normal;
+                font-style: normal;
+                font-size: 24px;
+                display: inline-block;
+                line-height: 1;
+                text-transform: none;
+                letter-spacing: normal;
+                word-wrap: normal;
+                white-space: nowrap;
+                direction: ltr;
+            }
         </style>
         <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <!-- Check if user is logged in, if yes show profile picture, else show login icon -->
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
@@ -182,9 +242,18 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
             </a>
             <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="../user/profile.php">View Profile</a>
-                    <a href="../user/edit-profile.php">Edit Profile</a>
-                    <a href="../user/logout.php">Log Out</a>
+                    <a href="../user/profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">person</i>
+                        View Profile
+                    </a>
+                    <a href="../user/edit-profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">edit</i>
+                        Edit Profile
+                    </a>
+                    <a href="../user/logout.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">logout</i>
+                        Log Out
+                    </a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -350,20 +419,31 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
         &copy; 2024 SmartSolutions. All rights reserved.
     </div>
     <script>
-    // Add JavaScript to toggle dropdown visibility
-    function toggleDropdown() {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        // Toggle the visibility of the dropdown menu
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    // Modern dropdown toggle with smooth transitions
+    function toggleDropdown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        profileDropdown.classList.toggle('active');
     }
 
-    // Close the dropdown if the user clicks anywhere outside of it
-    window.onclick = function(event) {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-            dropdownMenu.style.display = 'none';  // Hide the dropdown menu if clicked outside
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (profileDropdown && !profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('active');
         }
-    };
+    });
+
+    // Close dropdown on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown) {
+                profileDropdown.classList.remove('active');
+            }
+        }
+    });
 </script>
 <script src="js/search.js"></script>
 <script src="../js/jquery-animations.js"></script>

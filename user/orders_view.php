@@ -423,7 +423,7 @@ $conn->close();
             </style>
 
             <div class="login profile-dropdown">
-                <a href="javascript:void(0)" onclick="toggleDropdown()">
+                <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                     <img class="login" 
                         src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
                         alt="login-icon" 

@@ -292,7 +292,14 @@ $users_result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
                                 <?php 
                                 $profile_pic = "../image/login-icon.png";
                                 if (!empty($user['profile_picture'])) {
-                                    $profile_pic = '/ITP122/' . $user['profile_picture'];
+                                    // Check if it's a full URL (from OAuth like Google)
+                                    if (strpos($user['profile_picture'], 'http://') === 0 || strpos($user['profile_picture'], 'https://') === 0) {
+                                        $profile_pic = $user['profile_picture'];
+                                    } elseif (strpos($user['profile_picture'], '/') === 0) {
+                                        $profile_pic = $user['profile_picture'];
+                                    } else {
+                                        $profile_pic = '/ITP122/' . $user['profile_picture'];
+                                    }
                                 }
                                 ?>
                                 <img src="<?php echo $profile_pic; ?>" alt="Profile" class="user-img" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">

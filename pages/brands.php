@@ -19,7 +19,13 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            $profile_picture = "../" . $row['profile_picture'];
+            // Check if it's a full URL (Google image, etc.) or relative path
+            if (strpos($row['profile_picture'], 'http') === 0) {
+                $profile_picture = $row['profile_picture']; // Use URL as-is
+            } else {
+                // Add ../ prefix for relative paths since we're in pages/ subfolder
+                $profile_picture = "../" . $row['profile_picture'];
+            }
         }
     }
     $stmt->close();
@@ -41,7 +47,8 @@ $conn->close();
     .breadcrumb a { color: #0062F6; text-decoration: none; font-weight: 500; transition: color 0.3s ease; }
     .breadcrumb a:hover { color: #0052D4; }
     .brands-intro { background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%); padding: 60px 40px; text-align: center; }
-    .brands-intro h1 { font-size: 42px; color: #0062F6; margin-bottom: 60px; font-weight: 700; animation: slideInDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); letter-spacing: 2px; }
+    .brands-intro h1 { font-size: 48px; font-weight: 800; text-align: center; margin: 50px 0 20px; color: #0062F6; letter-spacing: -1.5px; animation: slideInDown 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); text-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; }
+    .brands-intro h1:hover { color: #004FCC; transform: translateY(-2px); }
     .brands-intro p { font-size: 15px; color: #2c3e50; line-height: 1.9; margin: 0 auto 0px; max-width: 900px; background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%); padding: 32px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 98, 246, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 98, 246, 0.1); animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; }
     .brands-intro p::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #0062F6 0%, #0052D4 100%); transform: scaleX(0); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .brands-intro p:hover::before { transform: scaleX(1); }
@@ -58,6 +65,21 @@ $conn->close();
     @keyframes slideInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 768px) { .brands-intro { padding: 40px 24px; } .brands-intro h1 { font-size: 32px; margin-bottom: 40px; } .brands-intro p { font-size: 14px; padding: 24px; } .logo-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; padding: 30px 20px; } .logo-grid img { max-height: 80px; } }
     @media (max-width: 480px) { .brands-intro { padding: 30px 16px; } .brands-intro h1 { font-size: 24px; margin-bottom: 30px; } .brands-intro p { font-size: 13px; padding: 18px; } .logo-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; padding: 20px 12px; } .logo-grid img { max-height: 70px; } }
+    
+    /* Modern Profile Dropdown */
+    .profile-dropdown { position: relative; display: inline-block; }
+    
+    .dropdown-content { display: none; position: absolute; top: 110%; right: 0; background: white; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); border: 1px solid #e0e0e0; min-width: 200px; z-index: 1000; }
+    
+    .dropdown-content a { display: flex; align-items: center; padding: 12px 16px; color: #333; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s ease; border-left: 3px solid transparent; }
+    
+    .dropdown-content a:hover { background: #f5f5f5; color: #0062F6; border-left-color: #0062F6; }
+    
+    .dropdown-content a .material-icons { font-size: 18px; margin-right: 12px; display: flex; align-items: center; }
+    
+    .profile-dropdown.active .dropdown-content { display: block; animation: slideDown 0.25s ease-out; }
+    
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body class="brands">
@@ -113,7 +135,7 @@ $conn->close();
             }
         </style>
         <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
                     alt="login-icon" 
@@ -121,12 +143,12 @@ $conn->close();
                             width: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>; 
                             height: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>;">
             </a>
-            <div id="dropdown-menu" class="dropdown-content">
+            <div class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="../user/profile.php">View Profile</a>
-                    <a href="../user/edit-profile.php">Edit Profile</a>
-                    <a href="../user/logout.php">Log Out</a>
-                    <?php endif; ?>
+                    <a href="../user/profile.php"><span class="material-icons">person</span>View Profile</a>
+                    <a href="../user/edit-profile.php"><span class="material-icons">edit</span>Edit Profile</a>
+                    <a href="../user/logout.php"><span class="material-icons">logout</span>Log Out</a>
+                <?php endif; ?>
                 </div>
             </div>
             <div class="login-text">
@@ -243,19 +265,25 @@ $conn->close();
 </div>
 <script>
     // Add JavaScript to toggle dropdown visibility
-    function toggleDropdown() {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        // Toggle the visibility of the dropdown menu
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    function toggleDropdown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        profileDropdown.classList.toggle('active');
     }
 
-    // Close the dropdown if the user clicks anywhere outside of it
-    window.onclick = function(event) {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-            dropdownMenu.style.display = 'none';
+    document.addEventListener('click', function(event) {
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (!profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('active');
         }
-    };
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.querySelector('.profile-dropdown').classList.remove('active');
+        }
+    });
 </script>
 <script src="js/search.js"></script>
 <script src="../js/jquery-animations.js"></script>

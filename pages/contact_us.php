@@ -4,6 +4,7 @@
 <link rel="shortcut icon" href="../image/smartsolutionslogo.jpg" type="../image/x-icon">
 <link rel="stylesheet" href="../css/design.css" />
 <link rel="stylesheet" href="../css/animations.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 <meta charset="UTF-8">
     <title>CONTACT US - SMARTSOLUTIONS</title>
 </head>
@@ -41,7 +42,11 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            $profile_picture = "../" . $row['profile_picture']; // Use user's profile picture
+            if (strpos($row['profile_picture'], 'http') === 0) {
+                $profile_picture = $row['profile_picture']; // Google/external URL
+            } else {
+                $profile_picture = "../" . $row['profile_picture']; // Local path with prefix
+            }
         }
     }
     $stmt->close();
@@ -98,8 +103,63 @@ $conn->close();
                 box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
             }
         </style>
+        <style>
+            .profile-dropdown {
+                position: relative;
+                display: inline-block;
+            }
+
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                top: 110%;
+                right: 0;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+                border: 1px solid #e0e0e0;
+                min-width: 200px;
+                z-index: 1000;
+            }
+
+            .dropdown-content a {
+                display: flex;
+                align-items: center;
+                padding: 12px 16px;
+                color: #333;
+                font-size: 14px;
+                font-weight: 500;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .dropdown-content a:hover {
+                background: #f5f5f5;
+                color: #0062F6;
+                border-left-color: #0062F6;
+            }
+
+            .profile-dropdown.active .dropdown-content {
+                display: block;
+            }
+
+            .material-icons {
+                font-family: 'Material Icons';
+                font-weight: normal;
+                font-style: normal;
+                font-size: 24px;
+                display: inline-block;
+                line-height: 1;
+                text-transform: none;
+                letter-spacing: normal;
+                word-wrap: normal;
+                white-space: nowrap;
+                direction: ltr;
+            }
+        </style>
         <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <!-- Check if user is logged in, if yes show profile picture, else show login icon -->
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : '../image/login-icon.png'; ?>" 
@@ -110,9 +170,18 @@ $conn->close();
             </a>
             <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="profile.php">View Profile</a>
-                    <a href="edit-profile.php">Edit Profile</a>
-                    <a href="logout.php">Log Out</a>
+                    <a href="../user/profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">person</i>
+                        View Profile
+                    </a>
+                    <a href="../user/edit-profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">edit</i>
+                        Edit Profile
+                    </a>
+                    <a href="../user/logout.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">logout</i>
+                        Log Out
+                    </a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -135,18 +204,51 @@ $conn->close();
     </div>
 
     <div class="breadcrumb">
-            <a href="../index.php">Home</a> >
-            <a>Contact Page</a>
+        <a href="../index.php"><span class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px;">home</span>Home</a> > <span class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px; color: #0062F6;">mail</span><a>Contact Us</a>
     </div>
-        <br>
+
+    <style>
+        .breadcrumb { padding: 16px 24px; font-size: 14px; color: #555; background: transparent; }
+        .breadcrumb a { color: #0062F6; text-decoration: none; font-weight: 500; transition: color 0.3s ease; }
+        .breadcrumb a:hover { color: #0052D4; }
+    </style>
+
+    <style>
+        .intro-paragraphs {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f5ff 100%);
+            border-radius: 12px;
+            border-left: 6px solid #0062F6;
+            box-shadow: 0 4px 20px rgba(0, 98, 246, 0.08);
+        }
+
+        .intro-paragraphs p {
+            margin: 16px 0;
+            line-height: 1.8;
+            color: #333;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .intro-paragraphs p:first-child {
+            font-weight: 600;
+            color: #0062F6;
+            font-size: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 98, 246, 0.2);
+            margin-bottom: 20px;
+        }
+    </style>
+
+    <div class="intro-paragraphs">
         <p>At Smart Solutions, we value your feedback and are always here to help. Whether you have a question about any of our products including gaming laptops, desktop packages, graphic cards, prebuild desktops or need assistance with an order, our customer service team and tech experts are ready to assist you.</p>
-        <br>
         <p>To get in touch with us, please use the contact form below or you can message us thru the messaging app integrated in our website. We will respond to your inquiry as soon as possible. If you would prefer to speak with someone directly, please call us at the number provided. Our customer service hours are Monday-Friday 9am-6pm PST.</p>
-        <br>
         <p>If you have a technical issue or need warranty support, please visit our support page, message us, email us at smartsolutionssupport@gmail.com.</p>
-        <br>
         <p>Thank you for choosing Smart Solutions as your trusted tech expert and online computer store in the Philippines.</p>
-        <br>
+    </div>
 
     <div class="contact-container">
     <div class="contact-form">
@@ -165,11 +267,11 @@ $conn->close();
     </div>
 
     <div class="contact-info">
-        <p>Location: Martinez Subdivision Phase 1, Barangay Dahican, City of Mati, Davao Oriental</p>
-        <p>Customer Service Hotline: 0951 813 0782</p>
-        <p>Office Hours: 9:00 AM - 6:00 PM</p>
-        <p>Email: smartsolutionscomputershop@gmail.com</p>
-        <p>Facebook: Smart Solutions Computer Shop</p>
+        <p><i class="material-icons" style="vertical-align: middle; font-size: 20px; margin-right: 10px;">location_on</i><strong>Location:</strong> Martinez Subdivision Phase 1, Barangay Dahican, City of Mati, Davao Oriental</p>
+        <p><i class="material-icons" style="vertical-align: middle; font-size: 20px; margin-right: 10px;">phone</i><strong>Customer Service Hotline:</strong> 0951 813 0782</p>
+        <p><i class="material-icons" style="vertical-align: middle; font-size: 20px; margin-right: 10px;">schedule</i><strong>Office Hours:</strong> 9:00 AM - 6:00 PM</p>
+        <p><i class="material-icons" style="vertical-align: middle; font-size: 20px; margin-right: 10px;">email</i><strong>Email:</strong> smartsolutionscomputershop@gmail.com</p>
+        <p><i class="material-icons" style="vertical-align: middle; font-size: 20px; margin-right: 10px;">people</i><strong>Facebook:</strong> Smart Solutions Computer Shop</p>
     <div class="map-container">
         <iframe
             src="https://www.google.com/maps?q=6.942242,126.247245&hl=es;z=14&output=embed"
@@ -230,22 +332,207 @@ $conn->close();
     <div class="copyright">
         &copy; 2024 SmartSolutions. All rights reserved.
     </div>
+
+    <style>
+        .contact-form h2 {
+            color: #0062F6;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .contact-form label {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            display: block;
+            margin-top: 12px;
+            margin-bottom: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .contact-form input[type="text"],
+        .contact-form input[type="email"],
+        .contact-form textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .contact-form input[type="text"]:hover,
+        .contact-form input[type="email"]:hover,
+        .contact-form textarea:hover {
+            border-color: #0062F6;
+            box-shadow: 0 2px 8px rgba(0, 98, 246, 0.1);
+        }
+
+        .contact-form input[type="text"]:focus,
+        .contact-form input[type="email"]:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            border-color: #0062F6;
+            box-shadow: 0 0 0 3px rgba(0, 98, 246, 0.1);
+            background-color: #f8f9ff;
+            transform: translateY(-2px);
+        }
+
+        .contact-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .contact-form input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 30px;
+            margin-bottom: 0;
+            background: linear-gradient(135deg, #0062F6 0%, #004FCC 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 98, 246, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .contact-form input[type="submit"]:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 98, 246, 0.5);
+            background: linear-gradient(135deg, #004FCC 0%, #003AA3 100%);
+        }
+
+        .contact-form input[type="submit"]:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 98, 246, 0.3);
+        }
+
+        .contact-info p {
+            padding: 12px 15px;
+            margin: 2px 0;
+            background: #f8f9ff;
+            border-left: 4px solid #0062F6;
+            border-radius: 6px;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .contact-info p:hover {
+            background: #f0f5ff;
+            box-shadow: 0 2px 8px rgba(0, 98, 246, 0.15);
+            transform: translateX(5px);
+        }
+
+        .contact-info p strong {
+            color: #0062F6;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .contact-info p i {
+            color: #0062F6;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .contact-info p:hover i {
+            transform: scale(1.1);
+        }
+
+        .map-container {
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .map-container:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .intro-paragraphs {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f5ff 100%);
+            border-radius: 12px;
+            border-left: 6px solid #0062F6;
+            box-shadow: 0 4px 20px rgba(0, 98, 246, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .intro-paragraphs:hover {
+            box-shadow: 0 8px 30px rgba(0, 98, 246, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .intro-paragraphs p {
+            margin: 16px 0;
+            line-height: 1.8;
+            color: #333;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+        }
+
+        .intro-paragraphs p:first-child {
+            font-weight: 600;
+            color: #0062F6;
+            font-size: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 98, 246, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .contact-form {
+            transition: all 0.3s ease;
+        }
+
+        .contact-form:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+        }
+    </style>
     <script>
-    // Add JavaScript to toggle dropdown visibility
-    function toggleDropdown() {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        // Toggle the visibility of the dropdown menu
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    // Toggle dropdown with modern implementation
+    function toggleDropdown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        profileDropdown.classList.toggle('active');
     }
 
-    // Close the dropdown if the user clicks anywhere outside of it
-    window.onclick = function(event) {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-            dropdownMenu.style.display = 'none';  // Hide the dropdown menu if clicked outside
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (profileDropdown && !profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('active');
         }
-    };
-</script>
+    });
+
+    // Close dropdown on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown) {
+                profileDropdown.classList.remove('active');
+            }
+        }
+    });
+    </script>
 <script src="js/search.js"></script>
 <script src="../js/jquery-animations.js"></script>
 <script src="../js/header-animation.js"></script>

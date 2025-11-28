@@ -86,7 +86,7 @@ $conn->close();
             </div>
         </a>
        <div class="login profile-dropdown">
-        <a href="javascript:void(0)" onclick="toggleDropdown()">
+        <a href="javascript:void(0)" onclick="toggleDropdown(event)">
             <!-- Check if user is logged in, if yes show profile picture, else show login icon -->
             <img class="login" 
                  src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : 'image/login-icon.png'; ?>" 

@@ -36,7 +36,7 @@ if ($result && $result->num_rows > 0) {
 }
 
 // Get user profile picture
-$profile_picture = "/ITP122/image/login-icon.png"; 
+$profile_picture = "image/login-icon.png"; 
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
     $query = "SELECT profile_picture FROM users WHERE id = ?";
@@ -47,7 +47,13 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            $profile_picture = "/ITP122/" . $row['profile_picture']; 
+            // Check if it's a full URL (Google image, etc.) or relative path
+            if (strpos($row['profile_picture'], 'http') === 0) {
+                $profile_picture = $row['profile_picture']; // Use URL as-is
+            } else {
+                // Use relative path
+                $profile_picture = $row['profile_picture']; 
+            }
         }
     }
     $stmt->close();
@@ -91,6 +97,42 @@ $conn->close();
     .add-to-cart { background: white; border: 2px solid #0062F6; padding: 8px 12px; display: flex; align-items: center; justify-content: center; }
     .add-to-cart:hover { background: #f0f7ff; border-color: #0052D4; }
     .add-to-cart img { max-width: 20px; height: 20px; object-fit: contain; filter: none; margin: 0; }
+    /* Modern Dropdown Styles */
+    .profile-dropdown { position: relative; display: inline-block; }
+    .profile-dropdown > a { cursor: pointer; display: flex; align-items: center; }
+    .profile-dropdown img { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .profile-dropdown:hover img { transform: scale(1.1); }
+    .dropdown-content { 
+        display: none;
+        position: absolute; 
+        top: 110%; 
+        right: 0; 
+        background: white; 
+        border-radius: 8px; 
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); 
+        border: 1px solid #e0e0e0;
+        min-width: 200px; 
+        z-index: 1000;
+    }
+    .dropdown-content a { 
+        display: flex;
+        align-items: center;
+        padding: 12px 16px; 
+        color: #333; 
+        text-decoration: none; 
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+    }
+    .dropdown-content a:hover { 
+        background: #f5f5f5;
+        color: #0062F6; 
+        border-left-color: #0062F6;
+    }
+    .profile-dropdown.active .dropdown-content { 
+        display: block;
+    }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 768px) { .processor-section h2 { font-size: 28px; margin-bottom: 30px; } .product-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; padding: 20px 16px; } .product-card { padding: 16px; } .product-card img { height: 140px; } }
@@ -159,10 +201,28 @@ $conn->close();
             </a>
             <div id="dropdown-menu" class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="../user/profile.php">View Profile</a>
-                    <a href="../user/edit-profile.php">Edit Profile</a>
-                    <a href="../user/logout.php">Log Out</a>
-                    <?php endif; ?>
+                    <a href="../user/profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">person</i>
+                        View Profile
+                    </a>
+                    <a href="../user/edit-profile.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">edit</i>
+                        Edit Profile
+                    </a>
+                    <a href="../user/logout.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">logout</i>
+                        Log Out
+                    </a>
+                <?php else: ?>
+                    <a href="../user/register.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">login</i>
+                        Sign In
+                    </a>
+                    <a href="../user/register.php">
+                        <i class="material-icons" style="font-size: 18px; vertical-align: middle; margin-right: 8px; display: inline-block;">person_add</i>
+                        Register
+                    </a>
+                <?php endif; ?>
                 </div>
             </div>
             <div class="login-text">

@@ -21,7 +21,7 @@ function getCartTotalQuantity() {
 $conn = new mysqli("localhost", "root", "", "smartsolutions");
 
 // Check if logged in
-$profile_picture = "/ITP122/image/login-icon.png"; // Default login icon
+$profile_picture = "image/login-icon.png"; // Default login icon
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
     
@@ -34,11 +34,23 @@ if (isset($_SESSION['user_id'])) {
     
     if ($row = $result->fetch_assoc()) {
         if (!empty($row['profile_picture'])) {
-            $profile_picture = "/ITP122/" . $row['profile_picture']; // Use user's profile picture
+            $profile_picture = $row['profile_picture']; // Use user's profile picture
         }
     }
     $stmt->close();
 }
+
+// Fetch discount products from database
+$discountProducts = [];
+$query = "SELECT id, name, price, image FROM products WHERE id IN (5, 157, 158, 7, 6, 9, 8, 10, 159, 160, 161, 162) ORDER BY id ASC";
+$result = $conn->query($query);
+
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $discountProducts[] = $row;
+    }
+}
+
 $conn->close();
 
 // Handle add to cart
@@ -61,10 +73,11 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="shortcut icon" href="/ITP122/image/smartsolutionslogo.jpg" type="/ITP122/image/x-icon">
+<link rel="shortcut icon" href="image/smartsolutionslogo.jpg" type="image/x-icon">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/ITP122/css/design.css" />
-<link rel="stylesheet" href="/ITP122/css/animations.css" />
+<link rel="stylesheet" href="css/design.css" />
+<link rel="stylesheet" href="css/animations.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 <meta charset="UTF-8">
 <title>SMART DEALS - SMARTSOLUTIONS</title>
 <style>
@@ -79,33 +92,111 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
     }
 }
 
+@keyframes fadeInUp { 
+    from { opacity: 0; transform: translateY(20px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+@keyframes slideInDown { 
+    from { opacity: 0; transform: translateY(-30px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
 #main-menu {
     animation: slideDownMenu 0.6s ease-out 0.3s both;
 }
+
+body { background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%) !important; }
+
+.breadcrumb { padding: 18px 32px; font-size: 14px; color: #666; background: transparent; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.breadcrumb a { color: #0062F6; text-decoration: none; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; }
+.breadcrumb a:hover { color: #0052D4; transform: translateX(4px); }
+.breadcrumb .material-icons { font-size: 20px; vertical-align: middle; }
+.breadcrumb span:not(.material-icons) { display: inline-flex; align-items: center; }
+
+.product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; padding: 40px 24px; max-width: 1200px; margin: 0 auto; background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%); }
+
+.product-card { background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%); border: 2px solid #e8f1ff; border-radius: 16px; padding: 20px; text-align: center; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 16px rgba(0, 98, 246, 0.08); position: relative; overflow: hidden; animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+
+.product-card:nth-child(1) { animation-delay: 0.1s; } 
+.product-card:nth-child(2) { animation-delay: 0.2s; } 
+.product-card:nth-child(3) { animation-delay: 0.3s; } 
+.product-card:nth-child(4) { animation-delay: 0.4s; } 
+.product-card:nth-child(5) { animation-delay: 0.5s; } 
+.product-card:nth-child(6) { animation-delay: 0.6s; } 
+.product-card:nth-child(7) { animation-delay: 0.7s; } 
+.product-card:nth-child(8) { animation-delay: 0.8s; }
+.product-card:nth-child(9) { animation-delay: 0.9s; } 
+.product-card:nth-child(10) { animation-delay: 1s; } 
+.product-card:nth-child(11) { animation-delay: 1.1s; } 
+.product-card:nth-child(12) { animation-delay: 1.2s; }
+
+.product-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0, 98, 246, 0.1), transparent); transition: left 0.6s ease; }
+
+.product-card:hover::before { left: 100%; }
+
+.product-card:hover { transform: translateY(-12px) scale(1.02); box-shadow: 0 12px 40px rgba(0, 98, 246, 0.2); border-color: #0062F6; background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%); }
+
+.product-card img { max-width: 100%; height: 180px; object-fit: contain; transition: all 0.4s ease; filter: drop-shadow(0 2px 8px rgba(0, 98, 246, 0.15)); margin-bottom: 16px; }
+
+.product-card:hover img { filter: drop-shadow(0 8px 20px rgba(0, 98, 246, 0.3)); transform: scale(1.1); }
+
+.deal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+
+.deal-badge { background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%); color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.deal-brand { background: #f0f7ff; color: #0062F6; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.product-card h4 { font-size: 14px; color: #333; margin-bottom: 12px; font-weight: 600; line-height: 1.4; }
+
+.price-container { margin: 12px 0; }
+
+.discounted-price { font-size: 20px; color: #0062F6; font-weight: 700; margin-bottom: 4px; }
+
+.original-price { font-size: 13px; color: #999; text-decoration: line-through; }
+
+.button-group { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
+
+.button-group a { flex: 1; text-decoration: none; }
+
+.buy-now, .add-to-cart { width: 100%; padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; font-size: 13px; }
+
+.buy-now { background: linear-gradient(135deg, #0062F6 0%, #0052D4 100%); color: white; }
+
+.buy-now:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 98, 246, 0.3); }
+
+.add-to-cart { background: white; border: 2px solid #0062F6; padding: 8px 12px; display: flex; align-items: center; justify-content: center; }
+
+.add-to-cart:hover { background: #f0f7ff; border-color: #0052D4; }
+
+.add-to-cart img { max-width: 20px; height: 20px; object-fit: contain; filter: none; margin: 0; }
+
+@media (max-width: 768px) { .product-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; padding: 20px 16px; } .product-card { padding: 16px; } .product-card img { height: 140px; } }
+
+@media (max-width: 480px) { .product-grid { grid-template-columns: 1fr; gap: 12px; padding: 16px; } .product-card { padding: 12px; } .product-card img { height: 120px; } .button-group { gap: 8px; } }
 </style>
 </head>
 <body>
 <header>
     <div class="ssheader">
         <div class="logo">
-            <img src="/ITP122/image/logo.png" alt="Smart Solutions Logo">
+            <img src="image/logo.png" alt="Smart Solutions Logo">
         </div>
         <div class="search-bar">
             <input type="text" placeholder="Search">
-        <div class="search-icon">
-            <img src="/ITP122/image/search-icon.png" alt="Search Icon">
+            <img class="search-icon" src="image/search-icon.png" alt="Search" style="width: 20px; height: 20px; cursor: pointer;">
         </div>
-        </div>
-        <a href="/ITP122/pages/location.php"><div class="location">
-            <img class="location" src="/ITP122/image/location-icon.png" alt="location-icon">
+        <a href="pages/location.php">
+            <div class="location">
+                <img class="location" src="image/location-icon.png" alt="location-icon">
+            </div>
         </a>
-        </div>
         <div class="track">
-            <a href="/ITP122/pages/track.php"><img class="track" src="/ITP122/image/track-icon.png" alt="track-icon"></a>
+            <a href="pages/track.php"><img class="track" src="image/track-icon.png" alt="track-icon"></a>
         </div>
-        <a href="../cart.php">
+        <a href="cart.php">
             <div class="cart">
-                <img class="cart" src="/ITP122/image/cart-icon.png" alt="cart-icon" style="width: 35px; height: auto;">
+                <img class="cart" src="image/cart-icon.png" alt="cart-icon" style="width: 35px; height: auto;">
                 <span class="cart-counter">
                     <?php echo getCartTotalQuantity(); ?>
                 </span>
@@ -135,8 +226,26 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
                 box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
             }
         </style>
-        <div class="login profile-dropdown">
-            <a href="javascript:void(0)" onclick="toggleDropdown()">
+
+        <!-- Modern Profile Dropdown CSS -->
+        <style>
+            .profile-dropdown { position: relative; display: inline-block; }
+            
+            .dropdown-content { display: none; position: absolute; top: 110%; right: 0; background: white; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); border: 1px solid #e0e0e0; min-width: 200px; z-index: 1000; }
+            
+            .dropdown-content a { display: flex; align-items: center; padding: 12px 16px; color: #333; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s ease; border-left: 3px solid transparent; }
+            
+            .dropdown-content a:hover { background: #f5f5f5; color: #0062F6; border-left-color: #0062F6; }
+            
+            .dropdown-content a .material-icons { font-size: 18px; margin-right: 12px; display: flex; align-items: center; }
+            
+            .profile-dropdown.active .dropdown-content { display: block; animation: slideDown 0.25s ease-out; }
+            
+            @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        </style>
+
+       <div class="login profile-dropdown">
+            <a href="javascript:void(0)" onclick="toggleDropdown(event)">
                 <!-- Check if user is logged in, if yes show profile picture, else show login icon -->
                 <img class="login" 
                     src="<?php echo isset($_SESSION['user_id']) ? $profile_picture : 'image/login-icon.png'; ?>" 
@@ -145,13 +254,12 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
                             width: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>; 
                             height: <?php echo isset($_SESSION['user_id']) ? '40px' : '30px'; ?>;">
             </a>
-            <div id="dropdown-menu" class="dropdown-content">
+            <div class="dropdown-content">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="../user/profile.php">View Profile</a>
-                    <a href="../user/edit-profile.php">Edit Profile</a>
-                    <a href="../user/logout.php">Log Out</a>
-                    <?php endif; ?>
-                </div>
+                    <a href="user/profile.php"><span class="material-icons">person</span>View Profile</a>
+                    <a href="user/edit-profile.php"><span class="material-icons">edit</span>Edit Profile</a>
+                    <a href="user/logout.php"><span class="material-icons">logout</span>Log Out</a>
+                <?php endif; ?>
             </div>
             <div class="login-text">
                 <?php if (isset($_SESSION['user_id'])): ?>
@@ -172,43 +280,50 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
 </div>
 
 <div class="breadcrumb">
-    <a href="index.php">Home</a> > <a>Smart Deals</a>
+    <a href="index.php"><span class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px;">home</span>Home</a> > <span class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 20px; color: #0062F6;">local_offer</span><a>Smart Deals</a>
 </div>
 
 <div class="processor-section">
-    <h2>SMART DEALS</h2>
+    <h2 style="font-size: 48px; font-weight: 800; text-align: center; margin: 50px 0 20px; color: #0062F6; letter-spacing: -1.5px; animation: slideInDown 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); text-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); transition: all 0.3s ease;">SMART DEALS</h2>
 </div>
 
 <div class="product-grid">
-    <?php
-    $products = [
-        ["id" => 5, "name" => "Team Elite Vulcan TUF 16gb 2x8 3200mhz Ddr4 Gaming Memory", "price" => 1999.00, "original_price" => 3652.00, "brand" => "TEAM ELITE", "image" => "image/deal1.png"],
-        ["id" => 157, "name" => "MSI NVIDIA® GeForce GTX 1650 D6 Ventus GDdr6 Gaming Videocard", "price" => 8550.00, "original_price" => 12430.00, "brand" => "MSI", "image" => "image/msi1650.png"],
-          ["id" => 158, "name" => "Gigabyte NVIDIA® GeForce RTX 3060 Gaming OC Gaming Videocard RGB", "price" => 20250.00, "original_price" => 33055.00, "brand" => "MSI", "image" => "image/Gigabyte-RTX-3060-Windforce.png"],
-          ["id" => 7, "name" => "G.Skill Ripjaws V 16gb 2x8 3200mhz Ddr4 Memory Black", "price" => 2185.00, "original_price" => 3844.00, "brand" => "G.SKILL", "image" => "image/deal3.png"],
-          ["id" => 6, "name" => "Team Elite Plus 8gb 1x8 3200Mhz Black Gold Ddr4 Memory", "price" => 1045.00, "original_price" => 1719.00, "brand" => "TEAM ELITE", "image" => "image/deal2.png"],
-          ["id" => 9, "name" => "AMD Ryzen 5 Pro 4650G Socket Am4 3.7ghz with Radeon Vega 7 Processor", "price" => 5845.00, "original_price" => 8595.00, "brand" => "AMD", "image" => "image/deal5.png"],
-          ["id" => 8, "name" => "Team Elite 8gb 1x8 1600mhz Ddr3 with Heatspreader Memory", "price" => 1065.00, "original_price" => 1687.00, "brand" => "TEAM ELITE", "image" => "image/deal4.png"],
-          ["id" => 10, "name" => "Team Elite TForce Delta TUF 16GB 2x8 3200mhz Ddr4 RGB Gaming Memory", "price" => 3155.00, "original_price" => 4549.00, "brand" => "TEAM ELITE", "image" => "image/deal6.png"],
-          ["id" => 159, "name" => "COOLERMASTER ML240L ARGB V2 Liquid Cooler WHITE ED", "price" => 3350.00, "original_price" => 5055.00, "brand" => "COOLERMASTER", "image" => "image/coolermaster1.png"],
-          ["id" => 160, "name" => "Edifier W800BT Plus Black, Red & White Bluetooth v5.1 Stereo Headphones", "original_price" => 1925.00, "brand" => "EDIFIER", "price" => 1345.00, "image" => "image/edifier.png"],
-          ["id" => 161, "name" => "Kingston KVR32S22S8/16 16gb 1x16 3200mhz Ddr4 Sodimm Memory", "price" => 3350.00, "original_price" => 4015.00, "brand" => "KINGSTON", "image" => "image/kingston.png"],
-          ["id" => 162, "name" => "AMD Ryzen 7 5700G Socket Am4 3.8GHz with Radeon Vega 8 Processor", "price" => 11195.00, "original_price" => 22895.00, "brand" => "AMD", "image" => "image/ryzen7.png"],
-    ];
-
-    foreach ($products as $product) {
-        $discount = $product['original_price'] - $product['price'];
+  <?php
+    // Display products fetched from database
+    foreach ($discountProducts as $product) {
+        $prodId = $product['id'];
+        // Calculate discount (assume 50% markup for original price)
+        $originalPrice = $product['price'] * 1.5;
+        $discount = $originalPrice - $product['price'];
+        
+        // Brand names mapping
+        $brands = [
+            5 => "TEAM ELITE",
+            157 => "MSI",
+            158 => "GIGABYTE",
+            7 => "G.SKILL",
+            6 => "TEAM ELITE",
+            9 => "AMD",
+            8 => "TEAM ELITE",
+            10 => "TEAM ELITE",
+            159 => "COOLERMASTER",
+            160 => "EDIFIER",
+            161 => "KINGSTON",
+            162 => "AMD",
+        ];
+        
+        $brand = $brands[$prodId] ?? "BRAND";
         ?>
         <div class='product-card'>
             <div class='deal-header'>
                 <div class='deal-badge'>SAVE ₱<?php echo number_format($discount, 2); ?></div>
-                <div class='deal-brand'><?php echo $product['brand']; ?></div>
+                <div class='deal-brand'><?php echo $brand; ?></div>
             </div>
             <img src='<?php echo $product['image']; ?>' alt='<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>'>
             <h4><?php echo $product['name']; ?></h4>
             <div class='price-container'>
                 <div class='discounted-price'>₱<?php echo number_format($product['price'], 2); ?></div>
-                <div class='original-price'>₱<?php echo number_format($product['original_price'], 2); ?></div>
+                <div class='original-price'>₱<?php echo number_format($originalPrice, 2); ?></div>
             </div>
              <div class='button-group'>
                 <a href="#" class="buy-now-btn" data-id="<?php echo $product['id']; ?>" data-name="<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>" data-price="<?php echo $product['price']; ?>" data-image="<?php echo $product['image']; ?>">
@@ -275,20 +390,31 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
 </div>
 
 <script>
-    // Add JavaScript to toggle dropdown visibility
-    function toggleDropdown() {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        // Toggle the visibility of the dropdown menu
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    // Modern dropdown toggle function
+    function toggleDropdown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        profileDropdown.classList.toggle('active');
     }
 
-    // Close the dropdown if the user clicks anywhere outside of it
-    window.onclick = function(event) {
-        var dropdownMenu = document.getElementById("dropdown-menu");
-        if (!event.target.matches('.profile-dropdown, .profile-dropdown *')) {
-            dropdownMenu.style.display = 'none';  // Hide the dropdown menu if clicked outside
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (profileDropdown && !profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('active');
         }
-    };
+    });
+
+    // Close dropdown on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            if (profileDropdown) {
+                profileDropdown.classList.remove('active');
+            }
+        }
+    });
     
     // Handle buy now button
     document.addEventListener('click', function(e) {
@@ -326,66 +452,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'add') {
         })
         .catch(err => console.log(err));
     });
-    
-    // Custom add to cart handler for smartdeals (root level page)
-    document.addEventListener('click', function(e) {
-        let target = e.target.closest('a.ajax-add');
-        if (!target) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const productId = target.getAttribute('data-id');
-        const productName = target.getAttribute('data-name');
-        const productPrice = target.getAttribute('data-price');
-        const productImage = target.getAttribute('data-image');
-        
-        console.log('Add to cart clicked:', {productId, productName, productPrice, productImage});
-        
-        if (!productId || !productName) {
-            console.log('Missing product data');
-            return;
-        }
-        
-        // Show quantity modal
-        const quantity = prompt('Enter quantity:', '1');
-        if (quantity === null || quantity === '' || isNaN(quantity) || quantity < 1) {
-            return;
-        }
-        
-        const formData = new FormData();
-        formData.append('product_id', productId);
-        formData.append('product_name', productName);
-        formData.append('product_price', productPrice);
-        formData.append('product_image', productImage);
-        formData.append('quantity', parseInt(quantity));
-        
-        console.log('Sending to add_to_cart.php');
-        
-        fetch('add_to_cart.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log('Response:', data);
-            if (data && data.total_items) {
-                const cartSpan = document.querySelector('.cart-counter');
-                if (cartSpan) {
-                    cartSpan.textContent = data.total_items;
-                }
-                alert('Added to cart successfully!');
-            } else if (data && data.success) {
-                alert('Added to cart successfully!');
-                location.reload();
-            }
-        })
-        .catch(err => {
-            console.log('Error:', err);
-            alert('Error adding to cart');
-        });
-    });
 </script>
+
+<script src="js/ajax-cart-clean.js"></script>
 <script src="js/search.js"></script>
 <script src="js/jquery-animations.js"></script>
 </body>
